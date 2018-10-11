@@ -11,13 +11,18 @@ $(function() {
         fetch("../api/games")
             .then(response => response.json())
             .then((data) => {
-                data.forEach(map => showOutput(JSON.stringify(map, null, 2)));
+                let a = data;
+                console.log(a);
+                console.log(data);
+                console.log("jsdh");
+                // data.forEach(map=> console.log());
+                data.forEach(map => showOutput(new Date(Date.parse(map.created))));
+
             })
             .catch(err => console.log(err))
     }
 
     // handler for when user clicks add person
-
     function addPlayer() {
         var fname = $("#fname").val();
         var lname = $("#lname").val();
@@ -47,6 +52,8 @@ $(function() {
                 showOutput( "Failed: " + textStatus );
             });
     }
+
+    function pad(s) { return (s < 10) ? '0' + s : s; }
 
     $("#add_player").on("click", addPlayer);
 

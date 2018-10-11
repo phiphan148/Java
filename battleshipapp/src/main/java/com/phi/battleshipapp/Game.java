@@ -2,6 +2,8 @@ package com.phi.battleshipapp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,9 +17,17 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
+
     @Column(name = "todayDate")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "GMT+2")
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "GMT+2")
     private Date todayDate;
+
+//    public String toStringDate(Date date){
+//        DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy hh:mm:ss");
+//        return dateFormat.format(date);
+//    }
+
 
     @OneToMany(mappedBy = "game", fetch=FetchType.EAGER)
     Set<GamePlayer> gamePlayers = new LinkedHashSet();
