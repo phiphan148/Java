@@ -3,6 +3,7 @@ package com.phi.battleshipapp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.*;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ public class Game {
     private Date todayDate;
 
     @OneToMany(mappedBy = "game", fetch=FetchType.EAGER)
-    Set<GamePlayer> gamePlayers;
+    Set<GamePlayer> gamePlayers = new LinkedHashSet();
 
     Game() {
         this.todayDate = new Date();

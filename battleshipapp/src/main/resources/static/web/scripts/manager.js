@@ -14,7 +14,7 @@ $(function() {
         //         showOutput(JSON.stringify(data, null, 2));
         //     })
         //     .catch(err => console.log(err))
-        $.get("rest/players")
+        $.get("api/games")
             .done(function(data) {
                 showOutput(JSON.stringify(data, null, 2));
             })

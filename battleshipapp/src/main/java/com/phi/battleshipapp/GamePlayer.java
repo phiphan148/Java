@@ -1,15 +1,8 @@
 package com.phi.battleshipapp;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Entity
 public class GamePlayer {
