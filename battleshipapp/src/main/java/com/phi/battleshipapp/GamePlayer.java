@@ -2,7 +2,9 @@ package com.phi.battleshipapp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.*;
-import java.util.Date;
+import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 @Entity
 public class GamePlayer {
@@ -20,8 +22,10 @@ public class GamePlayer {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="game_id")
-
     private Game game;
+
+    @OneToMany(mappedBy = "gamePlayer", fetch=FetchType.EAGER)
+    Set<Ship> ships = new LinkedHashSet();
 
     GamePlayer(){}
 
@@ -31,9 +35,18 @@ public class GamePlayer {
         this.player = player;
     }
 
+    public void addShip(Ship ship){
+        ship.setGamePlayer(this);
+        ships.add(ship);
+    }
+
+    public Set<Ship> getShips(){
+        return ships;
+    }
+
     @Override
     public String toString(){
-        return "Game Player" + this.date + this.game + this.player;
+        return "Game Player" + this.date + this.game + this.player + this.ships;
     }
 
     public Long getId() {
