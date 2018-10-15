@@ -20,7 +20,6 @@ public class Ship {
     private GamePlayer gamePlayer;
 
     @ElementCollection
-//    @CollectionTable(name="ship_location", joinColumns=@JoinColumn(name="ship_id"))
     @Column(name = "location")
     private List<String> locations = new ArrayList<>();
 
