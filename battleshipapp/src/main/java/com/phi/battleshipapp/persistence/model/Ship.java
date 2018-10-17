@@ -1,11 +1,9 @@
-package com.phi.battleshipapp;
+package com.phi.battleshipapp.persistence.model;
 
 import javax.persistence.*;
 import javax.persistence.GenerationType;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 public class Ship {
@@ -16,24 +14,24 @@ public class Ship {
     private String shipType;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="gameplayer_id")
+    @JoinColumn(name="gamePlayer_id")
     private GamePlayer gamePlayer;
 
     @ElementCollection
     @Column(name = "location")
-    private List<String> locations = new ArrayList<>();
+    private List<String> location = new ArrayList<>();
 
-    Ship(){}
+    public Ship(){}
 
-    Ship(String shipType, GamePlayer gamePlayer, List<String> locations){
+    public Ship(String shipType, GamePlayer gamePlayer, List<String> locations){
         this.shipType = shipType;
         this.gamePlayer = gamePlayer;
-        this.locations = locations;
+        this.location = locations;
     }
 
     @Override
     public String toString() {
-        return "Game starting date " + this.id + this.shipType + this.gamePlayer + this.locations;
+        return "Game starting date " + this.id + this.shipType + this.gamePlayer + this.location;
     }
 
     public Long getId() {
@@ -60,11 +58,11 @@ public class Ship {
         this.gamePlayer = gamePlayer;
     }
 
-    public List<String> getLocations() {
-        return locations;
+    public List<String> getLocation() {
+        return location;
     }
 
-    public void setLocations(List<String> locations) {
-        this.locations = locations;
+    public void setLocations(List<String> location) {
+        this.location = location;
     }
 }

@@ -1,0 +1,19 @@
+.table-style {
+    border: 1px solid #000;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.table-style th, tr, td {
+    border: 1px solid #000;
+    border-collapse: collapse;
+}
+
+.table-style td, th {
+    min-width: 40px;
+}
+
+.table-style thead, tbody th{
+    background: rgba(122, 194, 255, 0.33);
+}
+

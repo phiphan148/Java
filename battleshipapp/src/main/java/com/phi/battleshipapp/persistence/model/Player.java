@@ -1,8 +1,7 @@
-package com.phi.battleshipapp;
+package com.phi.battleshipapp.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,20 +22,20 @@ public class Player {
 
     public Player(){}
 
-    Player(String first, String last, String email){
+    public Player(String first, String last, String email){
         this.firstname = first;
         this.lastname = last;
         this.username = email;
     }
 
-    public void addGame(GamePlayer gamePlayer){
-        gamePlayer.setPlayer(this);
-        gamePlayers.add(gamePlayer);
-    }
-
+//    public void addGame(GamePlayer gamePlayer){
+//        gamePlayer.setPlayer(this);
+//        gamePlayers.add(gamePlayer);
+//    }
+//
     @JsonIgnore
     public List<Game> getGames(){
-        return gamePlayers.stream().map(gameplayer->gameplayer.getGame()).collect(toList());
+        return gamePlayers.stream().map(gamePlayer->gamePlayer.getGame()).collect(toList());
     }
 
     @Override

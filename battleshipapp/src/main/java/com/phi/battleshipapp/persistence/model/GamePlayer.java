@@ -1,10 +1,8 @@
-package com.phi.battleshipapp;
+package com.phi.battleshipapp.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.*;
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 @Entity
 public class GamePlayer {
@@ -27,9 +25,12 @@ public class GamePlayer {
     @OneToMany(mappedBy = "gamePlayer", fetch=FetchType.EAGER)
     Set<Ship> ships = new LinkedHashSet<>();
 
-    GamePlayer(){}
+    @OneToMany(mappedBy = "gamePlayer", fetch = FetchType.EAGER)
+    Set<Salvo> salvos = new LinkedHashSet<>();
 
-    GamePlayer(Game game, Player player){
+    public GamePlayer(){}
+
+    public GamePlayer(Game game, Player player){
         this.date = new Date();
         this.game = game;
         this.player = player;
@@ -42,6 +43,15 @@ public class GamePlayer {
 
     public Set<Ship> getShips(){
         return ships;
+    }
+
+    public void addSalvo(Salvo salvo){
+        salvo.setGamePlayer(this);
+        salvos.add(salvo);
+    }
+
+    public Set<Salvo> getSalvos() {
+        return salvos;
     }
 
     @Override

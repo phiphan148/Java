@@ -1,9 +1,8 @@
-package com.phi.battleshipapp;
+package com.phi.battleshipapp.persistence.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,17 +29,18 @@ public class Game {
     @OneToMany(mappedBy = "game", fetch=FetchType.EAGER)
     Set<GamePlayer> gamePlayers = new LinkedHashSet();
 
-    Game() {
+//    @JsonIgnore
+    public Game() {
         this.todayDate = new Date();
     }
 
-    public void addPlayer(GamePlayer gamePlayer){
-        gamePlayer.setGame(this);
-        gamePlayers.add(gamePlayer);
-    }
+//    public void addPlayer(GamePlayer gamePlayer){
+//        gamePlayer.setGame(this);
+//        gamePlayers.add(gamePlayer);
+//    }
 
     public List<Player> getPlayers(){
-        return gamePlayers.stream().map(gameplayer->gameplayer.getPlayer()).collect(toList());
+        return gamePlayers.stream().map(gamePlayer->gamePlayer.getPlayer()).collect(toList());
     }
 
     @Override
