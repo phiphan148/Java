@@ -19,7 +19,7 @@ public class BattleshipappApplication {
     }
 
     @Bean
-    public CommandLineRunner initGamePlayer(PlayersRepository playerRepository, GameRepository gameRepository, GamePlayerRepository gamePlayerRepository, ShipRepository shipRepository, SalvoRepository salvoRepository){
+    public CommandLineRunner initGamePlayer(PlayersRepository playerRepository, GameRepository gameRepository, GamePlayerRepository gamePlayerRepository, ShipRepository shipRepository, SalvoRepository salvoRepository, ScoreRepository scoreRepository){
         return (args) -> {
             Player player1 = new Player("Phi", "Phan", "phi@gmail.com");
             playerRepository.save(player1);
@@ -104,6 +104,19 @@ public class BattleshipappApplication {
             gamePlayer4.addSalvo(salvo6);
             salvoRepository.save(salvo6);
             gamePlayerRepository.save(gamePlayer4);
+
+            Date finishDate1 = Date.from(new Date().toInstant().plusSeconds(86400));
+//            Score score1 = new Score(0.5,game1,player1,finishDate1);
+//            scoreRepository.save(score1);
+
+//            Score score2 = new Score(0,game2,player3,finishDate1);
+//            scoreRepository.save(score2);
+
+            Score score3 = new Score(0.5,game3,player2,finishDate1);
+            scoreRepository.save(score3);
+
+            Score score4 = new Score(1,game3,player1,finishDate1);
+            scoreRepository.save(score4);
 
         };
     }

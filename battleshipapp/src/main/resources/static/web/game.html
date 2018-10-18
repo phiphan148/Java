@@ -12,25 +12,26 @@
     <title>Game view</title>
 </head>
 <body>
-<div class="container">
-    <h1>Game View - Ship Locations</h1>
-    <p><span class="font-weight-bold">Created game:</span> <span id="created"></span></p>
-    <div class="row">
-        <p class="col-6"><span class="font-weight-bold">Main player:</span> <span id="main-player"></span></p>
-        <p class="col-6"><span class="font-weight-bold">Opponent:</span> <span id="opponent"></span></p>
-    </div>
-    <div class="row">
-        <div class="col-6">
-            <h3>Ships</h3>
-            <table id="ship-grid" class="table-style"></table>
+<div class="bg">
+    <div class="container pb-3">
+        <h1 class="titleTxt-color pt-3">Game View</h1>
+        <p class="titleTxt-color"><span class="font-weight-bold text-warning">Created game:</span> <span id="created"></span></p>
+        <div class="row titleTxt-color">
+            <p class="col-6"><span class="font-weight-bold text-warning">Main player:</span> <span id="main-player"></span></p>
+            <p class="col-6"><span class="font-weight-bold text-warning">Opponent:</span> <span id="opponent"></span></p>
         </div>
-        <div class="col-6">
-            <h3>Salvos</h3>
-            <table id="salvo-grid" class="table-style"></table>
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-6 pt-2">
+                <h3 class="titleTxt-color">Ships</h3>
+                <table id="ship-grid" class="table-style" style="height: 400px"></table>
+            </div>
+            <div class="col-12 col-sm-12 col-md-6 pt-2">
+                <h3 class="titleTxt-color">Salvos</h3>
+                <table id="salvo-grid" class="table-style" style="height: 400px"></table>
+            </div>
         </div>
     </div>
 </div>
-
 
 <script src="https://code.jquery.com/jquery-2.2.0.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

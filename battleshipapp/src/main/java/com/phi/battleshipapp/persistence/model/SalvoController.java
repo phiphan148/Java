@@ -29,6 +29,12 @@ public class SalvoController {
                 .findAll().stream().map(map -> makeGameMap(map)).collect(toList());
     }
 
+    @RequestMapping(value = "/scores", method = RequestMethod.GET)
+    public List<Object> scoreDetails() {
+        return gamePlayerRepo
+                .findAll().stream().map(gameplayer -> makeGamePlayerMap(gameplayer)).collect(toList());
+    }
+
     @RequestMapping("/game_view/{nn}")
     public Map<String, Object> findGamePlayer(@PathVariable Long nn) {
         Map<String, Object> gamePlayer = new LinkedHashMap<>();
@@ -38,8 +44,6 @@ public class SalvoController {
         Set<GamePlayer> gamePlayerSet = gamePlayerById.getGame().gamePlayers;
         List<Player> opponents = opponentList(playerList, gamePlayerById.getPlayer());
 
-//        List<Game> gameIds = gamePlayerRepo.findAll().stream().map(gamePlayer -> gamePlayer.getGame()).collect(toList());
-//        Game gameById = gameIds.stream().filter((game) -> game.getId() == nn).findAny().get();
         gamePlayer.put("game", makeGameMap(gamePlayerById.getGame()));
         gamePlayer.put("mainPlayer", makePlayerMap(gamePlayerById.getPlayer()));
         gamePlayer.put("opponent", playerList(opponents));
@@ -99,6 +103,11 @@ public class SalvoController {
         Map<String, Object> gamePlayerMap = new LinkedHashMap<>();
         gamePlayerMap.put("id", gamePlayer.getId());
         gamePlayerMap.put("player", makePlayerMap(gamePlayer.getPlayer()));
+        if(gamePlayer.getScore()!= null) {
+            gamePlayerMap.put("score", makeScoreMap(gamePlayer.getScore()));
+        } else {
+            gamePlayerMap.put("score", null);
+        }
         return gamePlayerMap;
     }
 
@@ -121,8 +130,14 @@ public class SalvoController {
         Map<String, Object> gamePlayerMap = new LinkedHashMap<>();
         gamePlayerMap.put("id", game.getId());
         gamePlayerMap.put("created", game.getTodayDate());
-//        gamePlayerMap.put("gamePlayers", gamePlayer(game.gamePlayers));
+        gamePlayerMap.put("gamePlayers", gamePlayer(game.gamePlayers));
         return gamePlayerMap;
+    }
+
+    private Map<String, Object> makeScoreMap(Score score) {
+        Map<String, Object> scoreMap = new LinkedHashMap<>();
+        scoreMap.put("score", score.getScore());
+        return scoreMap;
     }
 
 }

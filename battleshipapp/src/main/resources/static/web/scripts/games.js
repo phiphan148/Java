@@ -1,39 +1,59 @@
 $(function () {
 
-    // display text in the output area
-    function showOutput(data1, data2) {
-        let li = document.createElement("li");
-        let liTxt1 = document.createTextNode(`Game: ${data1}, `);
-        let liTxt2;
-        if (data2.length != 0) {
-            liTxt2 = document.createTextNode(`Players: ${data2}`);
-        } else {
-            liTxt2 = document.createTextNode('There is no player for this game');
-        }
-        li.appendChild(liTxt1);
-        li.appendChild(liTxt2)
-        document.getElementById("games").appendChild(li);
-    }
-
     // load and display JSON sent by server for /players
     function loadData() {
-        fetch("../api/games")
+        fetch("../api/scores")
             .then(response => response.json())
             .then((data) => {
                 let gameData = data;
-                gameData.forEach(map =>
-                    showOutput(
-                        [pad(new Date(Date.parse(map.created)).getDate()),
-                            pad(new Date(Date.parse(map.created)).getMonth() + 1),
-                            pad(new Date(Date.parse(map.created)).getFullYear())].join('/'),
-                        map.gamePlayers.map(gameplayer => gameplayer.player.email))
-                );
+                console.log(gameData);
+                let gamePlayerList = [];
+                gameData.forEach(gamedata => {
+                    if (!gamePlayerList.includes(gamedata.player.email)) {
+                        gamePlayerList.push(gamedata.player.email);
+                    }
+                });
+                let table = document.getElementById("score-table");
+                let tHead = document.createElement("thead");
+                let tHeadContent = '';
+                let label = ["Player", "Total", "Won", "Lost", "Tied"];
+                for (let i = 0; i < label.length; i++) {
+                    tHeadContent += `<th>${label[i]}</th>`
+                }
+                table.appendChild(tHead).innerHTML = tHeadContent;
+                let tBody = document.createElement("tbody");
+                let tBodyContent = '';
+                for (let j = 0; j < gamePlayerList.length; j++) {
+                    let totalScore = 0, won = 0, lost = 0, tied = 0;
+                    let playerInfo = gameData.filter(game => game.player.email.includes(gamePlayerList[j]));
+                    playerInfo.forEach(player => {
+                        if (player.score != null) {
+                            totalScore += player.score.score;
+                            switch (player.score.score) {
+                                case 1:
+                                    won += 1;
+                                    break;
+                                case 0.5:
+                                    tied += 1;
+                                    break;
+                                case 0:
+                                    lost += 1;
+                                    break;
+                            }
+                        }
+                    });
+                    tBodyContent += `<tr>
+                                        <td>${gamePlayerList[j]}</td>
+                                        <td>${totalScore}</td>
+                                        <td>${won}</td>
+                                        <td>${lost}</td>
+                                        <td>${tied}</td>
+                                     </tr>`;
+
+                }
+                table.appendChild(tBody).innerHTML = tBodyContent;
             })
             .catch(err => console.log(err))
-    }
-
-    function pad(s) {
-        return (s < 10) ? '0' + s : s;
     }
 
     loadData();

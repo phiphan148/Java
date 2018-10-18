@@ -1,7 +1,18 @@
+@media only screen and (min-width: 576px) and (max-width: 992px) {
+    .table-style td, th {
+        min-width: 30px !important;
+    }
+}
+
+.titleTxt-color{
+    color: #fff;
+}
+
 .table-style {
     border: 1px solid #000;
     border-collapse: collapse;
     text-align: center;
+    background-color: #fff;
 }
 
 .table-style th, tr, td {
@@ -17,3 +28,11 @@
     background: rgba(122, 194, 255, 0.33);
 }
 
+.padding-cell th, td{
+    padding: 5px 10px;
+}
+
+.bg{
+    background: url("../img/bg.jpg") no-repeat;
+    min-height: 100vh;
+}

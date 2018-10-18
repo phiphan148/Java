@@ -3,10 +3,7 @@ package com.phi.battleshipapp.persistence.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -14,7 +11,7 @@ import static java.util.stream.Collectors.toList;
 public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @Column(name = "todayDate")
 //    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "GMT+2")
@@ -25,11 +22,13 @@ public class Game {
 //        return dateFormat.format(date);
 //    }
 
-
-    @OneToMany(mappedBy = "game", fetch=FetchType.EAGER)
+    @OneToMany(mappedBy = "game", fetch = FetchType.EAGER)
     Set<GamePlayer> gamePlayers = new LinkedHashSet();
 
-//    @JsonIgnore
+    @OneToMany(mappedBy = "game", fetch = FetchType.EAGER)
+    Set<Score> scores = new LinkedHashSet<>();
+
+    //    @JsonIgnore
     public Game() {
         this.todayDate = new Date();
     }
@@ -39,8 +38,17 @@ public class Game {
 //        gamePlayers.add(gamePlayer);
 //    }
 
-    public List<Player> getPlayers(){
-        return gamePlayers.stream().map(gamePlayer->gamePlayer.getPlayer()).collect(toList());
+    public List<Player> getPlayers() {
+        return gamePlayers.stream().map(gamePlayer -> gamePlayer.getPlayer()).collect(toList());
+    }
+
+    public void addScore(Score score) {
+        score.setGame(this);
+        scores.add(score);
+    }
+
+    public Set<Score> getScores() {
+        return scores;
     }
 
     @Override
@@ -56,11 +64,11 @@ public class Game {
         this.todayDate = todayDate;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

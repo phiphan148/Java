@@ -8,7 +8,7 @@ import java.util.*;
 public class GamePlayer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @Column
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "GMT+2")
@@ -54,16 +54,20 @@ public class GamePlayer {
         return salvos;
     }
 
+    public Score getScore(){
+        return player.getScore(game);
+    }
+
     @Override
     public String toString(){
         return "Game Player" + this.date + this.game + this.player + this.ships;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

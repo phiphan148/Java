@@ -2,23 +2,26 @@ package com.phi.battleshipapp.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import static java.util.stream.Collectors.toList;
 
 @Entity
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     private String firstname;
     private String lastname;
     private String username;
 
     @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
     Set<GamePlayer> gamePlayers = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "player", fetch = FetchType.EAGER)
+    Set<Score> scores = new LinkedHashSet<>();
 
     public Player(){}
 
@@ -33,6 +36,20 @@ public class Player {
 //        gamePlayers.add(gamePlayer);
 //    }
 //
+
+    public void addScore(Score score) {
+        score.setPlayer(this);
+        scores.add(score);
+    }
+
+    public Set<Score> getScores() {
+        return scores;
+    }
+
+    public Score getScore(Game game){
+        return scores.stream().filter(score -> score.getGame().equals(game)).findFirst().orElse(null);
+    }
+
     @JsonIgnore
     public List<Game> getGames(){
         return gamePlayers.stream().map(gamePlayer->gamePlayer.getGame()).collect(toList());
@@ -43,11 +60,11 @@ public class Player {
         return this.id + ' ' + this.firstname + ' ' + this.lastname + ' ' + this.username;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

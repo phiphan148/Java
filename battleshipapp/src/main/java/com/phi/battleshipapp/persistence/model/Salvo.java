@@ -8,7 +8,7 @@ import java.util.List;
 public class Salvo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "gamePlayer_id")
@@ -32,11 +32,11 @@ public class Salvo {
         return "Game starting date " + this.id + this.gamePlayer + this.turnLocation + this.turn;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
