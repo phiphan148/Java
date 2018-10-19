@@ -61,6 +61,7 @@ $(function () {
 
                 let shipLocation = [];
                 ships.forEach(ship => ship.shipLocation.forEach(location => shipLocation.push(location)));
+                console.log(shipLocation);
                 if (shipLocation.length > 0) {
                     for (let i = 0; i < shipLocation.length; i++) {
                         document.getElementById("ship-grid").querySelector(`#${shipLocation[i]}`).style.background = "blue";
