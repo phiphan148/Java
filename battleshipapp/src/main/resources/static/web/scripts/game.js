@@ -15,17 +15,17 @@ $(function () {
         let firstcol = [" ", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
         for (let j = 1; j < firstrow.length; j++) {
             tbodycontent += `<tr>
-                                <th id=${firstcol[j]}0>${firstcol[j]}</th>
-                                <td id=${firstcol[j]}1></td>
-                                <td id=${firstcol[j]}2></td>
-                                <td id=${firstcol[j]}3></td>
-                                <td id=${firstcol[j]}4></td>
-                                <td id=${firstcol[j]}5></td>
-                                <td id=${firstcol[j]}6></td>
-                                <td id=${firstcol[j]}7></td>
-                                <td id=${firstcol[j]}8></td>
-                                <td id=${firstcol[j]}9></td>
-                                <td id=${firstcol[j]}10></td>
+                                <th class=${firstcol[j]}0>${firstcol[j]}</th>
+                                <td class=${firstcol[j]}1></td>
+                                <td class=${firstcol[j]}2></td>
+                                <td class=${firstcol[j]}3></td>
+                                <td class=${firstcol[j]}4></td>
+                                <td class=${firstcol[j]}5></td>
+                                <td class=${firstcol[j]}6></td>
+                                <td class=${firstcol[j]}7></td>
+                                <td class=${firstcol[j]}8></td>
+                                <td class=${firstcol[j]}9></td>
+                                <td class=${firstcol[j]}10></td>
                             </tr>`
         }
         table.appendChild(tbody).innerHTML = tbodycontent;
@@ -64,7 +64,7 @@ $(function () {
                 console.log(shipLocation);
                 if (shipLocation.length > 0) {
                     for (let i = 0; i < shipLocation.length; i++) {
-                        document.getElementById("ship-grid").querySelector(`#${shipLocation[i]}`).style.background = "blue";
+                        document.getElementById("ship-grid").querySelector(`.${shipLocation[i]}`).style.background = "blue";
                     }
                 }
 
@@ -73,8 +73,8 @@ $(function () {
                         let shots = shipsGetHit[i].turn;
                         for (let j = 0; j < shipsGetHit[i].location.length; j++) {
                             if(shipLocation.includes(shipsGetHit[i].location[j])){
-                                document.getElementById("ship-grid").querySelector(`#${shipsGetHit[i].location[j]}`).style.background = "red";
-                                document.getElementById("ship-grid").querySelector(`#${shipsGetHit[i].location[j]}`).innerHTML = shots;
+                                document.getElementById("ship-grid").querySelector(`.${shipsGetHit[i].location[j]}`).style.background = "red";
+                                document.getElementById("ship-grid").querySelector(`.${shipsGetHit[i].location[j]}`).innerHTML = shots;
                             }
                         }
                     }
@@ -84,8 +84,8 @@ $(function () {
                     for (let i = 0; i < salvos.length; i++) {
                         let shots = salvos[i].turn;
                         for (let j = 0; j < salvos[i].location.length; j++) {
-                            document.getElementById("salvo-grid").querySelector(`#${salvos[i].location[j]}`).style.background = "green";
-                            document.getElementById("salvo-grid").querySelector(`#${salvos[i].location[j]}`).innerHTML = shots;
+                            document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.background = "green";
+                            document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).innerHTML = shots;
                         }
                     }
                 }
