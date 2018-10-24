@@ -1,6 +1,9 @@
 package com.phi.battleshipapp.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -16,6 +19,9 @@ public class Player {
     private String firstname;
     private String lastname;
     private String username;
+    private String password;
+
+
 
     @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
     Set<GamePlayer> gamePlayers = new LinkedHashSet<>();
@@ -25,10 +31,11 @@ public class Player {
 
     public Player(){}
 
-    public Player(String first, String last, String email){
+    public Player(String first, String last, String email, String password){
         this.firstname = first;
         this.lastname = last;
         this.username = email;
+        this.password = password;
     }
 
 //    public void addGame(GamePlayer gamePlayer){
@@ -90,5 +97,13 @@ public class Player {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

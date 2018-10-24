@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, shrink-to-fit=no">
+    <link rel="stylesheet" href="/web/styles/styles.css">
+    <title>Game view</title>
+</head>
+<body>
+<div class="bg">
+    <div class="container">
+        <form id="login-form" onsubmit="return false">
+            <label>Email/Username: <input id="usernameLogin" type="text" name="usernameLogin"></label>
+            <label>Password: <input id="passwordLogin" type="password" name="passwordLogin"></label>
+            <button onclick="login()">Log in</button>
+        </form>
+
+        <form id="logout-form" onsubmit="return false">
+            <button onclick="logout()">Log out</button>
+        </form>
+
+        <form id="register-form" onsubmit="return false">
+            <label>First Name: <input id="firstNameRegister" type="text" name="firstnameRegister"></label>
+            <label>Last Name: <input id="lastNameRegister" type="text" name="lastnameRegister"></label>
+            <label>Email/Username: <input id="usernameRegister" type="text" name="emailRegister"></label>
+            <label>Password: <input id="passwordRegister" type="password" name="passwordRegister"></label>
+            <button onclick="register()">Register</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.2.0.js"></script>
+<script src="/web/scripts/authentic.js"></script>
+</body>
+</html>

@@ -14,11 +14,21 @@
 <body>
 <div class="bg">
     <div class="container">
-        <h1 class="pb-3 titleTxt-color pt-3">Player Manager</h1>
-        <table id="score-table" class="table-style padding-cell"></table>
+        <p id="welcome">Hi <span id="playerLoginName"></span>!</p>
+        <form class="row" id="login-form" onsubmit="return false">
+            <label class="col-12">Email/Username: <input id="usernameLogin" type="text" name="usernameLogin"></label>
+            <label class="col-12">Password: <input id="passwordLogin" type="password" name="passwordLogin"></label>
+            <button onclick="login()">Log in</button>
+        </form>
+        <form id="logout-form" onsubmit="return false">
+            <button onclick="logout()">Log out</button>
+        </form>
+        <div>
+            <h1 class="pb-3 titleTxt-color pt-3">Player Manager</h1>
+            <table id="score-table" class="table-style padding-cell"></table>
+        </div>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-2.2.0.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -28,6 +38,8 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
         integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-2.2.0.js"></script>
+<script src="/web/scripts/authentic.js"></script>
 <script src="/web/scripts/games.js"></script>
 
 </body>

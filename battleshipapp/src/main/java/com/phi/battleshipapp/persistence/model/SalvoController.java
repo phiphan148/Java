@@ -2,11 +2,13 @@ package com.phi.battleshipapp.persistence.model;
 
 import com.phi.battleshipapp.persistence.repo.GamePlayerRepository;
 import com.phi.battleshipapp.persistence.repo.GameRepository;
+import com.phi.battleshipapp.persistence.repo.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -23,10 +25,23 @@ public class SalvoController {
     @Autowired
     private GamePlayerRepository gamePlayerRepo;
 
+    @Autowired
+    private PlayerRepository playerRepo;
+
     @RequestMapping(value = "/games", method = RequestMethod.GET)
-    public List<Object> gameDetails() {
-        return gameRepo
-                .findAll().stream().map(map -> makeGameMap(map)).collect(toList());
+    public Map<String, Object> makeGameMapWithCurrentUser(Authentication authentication) {
+        Map<String, Object> gameMapWithCurrentUser = new LinkedHashMap<>();
+        List<Object> games = gameRepo
+                .findAll().stream().map(game -> makeGameMap(game)).collect(toList());
+        List<String> usersEmail = playerRepo.findAll()
+                .stream().map(player -> player.getUsername()).collect(toList());
+        if (!checkLogin(authentication) || !usersEmail.contains(getCurrentUser(authentication).getUsername())) {
+            gameMapWithCurrentUser.put("currentPlayer", null);
+        } else {
+            gameMapWithCurrentUser.put("currentPlayer", makePlayerMap(getCurrentUser(authentication)));
+        }
+        gameMapWithCurrentUser.put("games", games);
+        return gameMapWithCurrentUser;
     }
 
     @RequestMapping(value = "/scores", method = RequestMethod.GET)
@@ -49,9 +64,30 @@ public class SalvoController {
         gamePlayer.put("opponent", playerList(opponents));
         gamePlayer.put("mainPlayerShips", shipsList(gamePlayerById.getShips()));
         gamePlayer.put("mainPlayerSalvos", salvoList(gamePlayerById.getSalvos()));
+//        gamePlayer.put("opponentShips", shipsList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getShips()));
         gamePlayer.put("opponentSalvos", salvoList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getSalvos()));
 
         return gamePlayer;
+    }
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @RequestMapping(value = "/players", method = RequestMethod.POST)
+    public ResponseEntity<Object> register(
+            @RequestParam String firstname, @RequestParam String lastname,
+            @RequestParam String username, @RequestParam String password) {
+
+        if (firstname.isEmpty() || lastname.isEmpty() || username.isEmpty() || password.isEmpty()) {
+            return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
+        }
+
+        if (playerRepo.findByUsername(username) != null) {
+            return new ResponseEntity<>("Email already in use", HttpStatus.FORBIDDEN);
+        }
+
+        playerRepo.save(new Player(firstname, lastname, username, passwordEncoder.encode(password)));
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     private GamePlayer getGamePlayerOpponent(Set<GamePlayer> gamePlayers, GamePlayer gamePlayer) {
@@ -103,7 +139,7 @@ public class SalvoController {
         Map<String, Object> gamePlayerMap = new LinkedHashMap<>();
         gamePlayerMap.put("id", gamePlayer.getId());
         gamePlayerMap.put("player", makePlayerMap(gamePlayer.getPlayer()));
-        if(gamePlayer.getScore()!= null) {
+        if (gamePlayer.getScore() != null) {
             gamePlayerMap.put("score", makeScoreMap(gamePlayer.getScore()));
         } else {
             gamePlayerMap.put("score", null);
@@ -138,6 +174,18 @@ public class SalvoController {
         Map<String, Object> scoreMap = new LinkedHashMap<>();
         scoreMap.put("score", score.getScore());
         return scoreMap;
+    }
+
+    private Player getCurrentUser(Authentication authentication) {
+        return playerRepo.findByUsername(authentication.getName());
+    }
+
+    private Boolean checkLogin(Authentication authentication) {
+        if (authentication == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
 }

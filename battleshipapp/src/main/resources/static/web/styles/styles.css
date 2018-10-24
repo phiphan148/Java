@@ -36,3 +36,7 @@
     background: url("../img/bg.jpg") no-repeat;
     min-height: 100vh;
 }
+
+#welcome{
+    display: none;
+}

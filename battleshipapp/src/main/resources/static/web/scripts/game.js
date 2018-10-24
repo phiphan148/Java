@@ -47,7 +47,8 @@ $(function () {
                 let gamePlayerData = data;
                 let ships = gamePlayerData.mainPlayerShips;
                 let salvos = gamePlayerData.mainPlayerSalvos;
-                let shipsGetHit = gamePlayerData.opponentSalvos;
+                let opponentSalvos = gamePlayerData.opponentSalvos;
+                // let opponentShips = gamePlayerData.opponentShips;
 
                 document.getElementById("main-player").innerText = gamePlayerData.mainPlayer.email;
                 document.getElementById("created").innerText = convertDate(gamePlayerData.game.created);
@@ -68,24 +69,30 @@ $(function () {
                     }
                 }
 
-                if (shipsGetHit.length > 0) {
-                    for (let i = 0; i < shipsGetHit.length; i++) {
-                        let shots = shipsGetHit[i].turn;
-                        for (let j = 0; j < shipsGetHit[i].location.length; j++) {
-                            if(shipLocation.includes(shipsGetHit[i].location[j])){
-                                document.getElementById("ship-grid").querySelector(`.${shipsGetHit[i].location[j]}`).style.background = "red";
-                                document.getElementById("ship-grid").querySelector(`.${shipsGetHit[i].location[j]}`).innerHTML = shots;
+                if (opponentSalvos.length > 0) {
+                    for (let i = 0; i < opponentSalvos.length; i++) {
+                        let shots = opponentSalvos[i].turn;
+                        for (let j = 0; j < opponentSalvos[i].location.length; j++) {
+                            if(shipLocation.includes(opponentSalvos[i].location[j])){
+                                document.getElementById("ship-grid").querySelector(`.${opponentSalvos[i].location[j]}`).style.background = "red";
+                                document.getElementById("ship-grid").querySelector(`.${opponentSalvos[i].location[j]}`).innerHTML = shots;
                             }
                         }
                     }
                 }
 
+                // let opponentS = [];
+                // opponentShips.forEach(ship=> ship.shipLocation.forEach(location=>opponentS.push(location)));
+                // console.log(opponentS);
                 if (salvos.length > 0) {
                     for (let i = 0; i < salvos.length; i++) {
                         let shots = salvos[i].turn;
                         for (let j = 0; j < salvos[i].location.length; j++) {
                             document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.background = "green";
                             document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).innerHTML = shots;
+                            // if(opponentS.includes(salvos[i].location[j])){
+                            //     document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.background = "red";
+                            // }
                         }
                     }
                 }
