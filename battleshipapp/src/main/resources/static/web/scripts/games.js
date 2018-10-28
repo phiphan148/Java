@@ -14,9 +14,10 @@ function mainGames() {
         })
         .catch(err => console.log(err))
 }
+
 mainGames();
 
-function createTable(tableId, gameData, gamePlayerList){
+function createTable(tableId, gameData, gamePlayerList) {
     let table = document.getElementById(tableId);
     let tHead = document.createElement("thead");
     let tHeadContent = '';
@@ -61,21 +62,30 @@ function createTable(tableId, gameData, gamePlayerList){
 function checkLogin() {
     fetch("../api/games")
         .then(response => response.json())
-        .then((data)=>{
+        .then((data) => {
             let userData = data.currentPlayer;
             let games = data.games;
             console.log(data);
-            if(userData != null){
+            if (userData != null) {
                 document.getElementById("playerLoginName").innerText = userData.email;
                 document.getElementById("welcome").style.display = "block";
                 document.getElementById("table-score").style.display = "block";
                 document.getElementById("form-logIn-register").style.display = "none";
+                let gameListCurrentUser = [];
                 let linkRejoinGame = '';
-                for(let i=0; i<games.length; i++){
-                    games[i].gamePlayers.forEach(gp=>{
-                        if(gp.player.id == userData.id){
-                            linkRejoinGame += `<p><a class="titleTxt-color" target="_blank" href="../web/game.html?gp=${gp.id}">Click here to re-enter your game</a></p>`;
-                        }})
+
+                for (let i = 0; i < games.length; i++) {
+                    games[i].gamePlayers.forEach(gp => {
+                        if (gp.player.id == userData.id) {
+                            gameListCurrentUser.push(gp);
+                        }
+                    })
+                }
+                if(gameListCurrentUser.length>0){
+                    document.getElementById("current-game").innerHTML = `<p style="color: #f7ff00">You have ${gameListCurrentUser.length} current games:</p>`;
+                    gameListCurrentUser.forEach(gamePlayer=>{
+                        linkRejoinGame += `<li><a style="color: #f7ff00" target="_blank" href="../web/game.html?gp=${gamePlayer.id}">Click here to re-enter your game</a></li>`;
+                    })
                 }
                 document.getElementById("link-to-reenter-game").innerHTML = linkRejoinGame;
             } else {
@@ -84,7 +94,7 @@ function checkLogin() {
                 document.getElementById("form-logIn-register").style.display = "block";
             }
         })
-        .catch(err=>alert(err))
+        .catch(err => alert(err))
 }
 
 function login(user, pass) {
@@ -99,16 +109,16 @@ function login(user, pass) {
             window.location.reload();
             console.log("logged in!");
         })
-        .fail(err=> alert(err.responseText));
+        .fail(err => alert(`${err.responseJSON.status}: ${err.responseJSON.error}`));
 }
 
 function logout() {
     $.post("/api/logout")
-        .done(function() {
+        .done(function () {
             window.location.href = "../web/games.html";
             console.log("logged out");
         })
-        .fail(err=> alert(err.responseText));
+        .fail(err => alert(err.responseText));
 }
 
 function register() {
@@ -124,9 +134,59 @@ function register() {
             password: password.value
         })
         .done(function () {
-            login('usernameRegister','passwordRegister');
+            login('usernameRegister', 'passwordRegister');
         })
-        .fail(err=> alert(err.responseText));
+        .fail(err => console.log(err));
 }
 
+function addGame() {
+    fetch('/api/games', {
+        method: 'POST',
+        body: JSON.stringify({}),
+        headers: new Headers({
+            contentType: 'application/json'
+        })
+    })
+        .then(response => response.json())
+        .then((data) => {
+            window.location.href = `../web/game.html?gp=${data.gamePlayerId}`;
+        })
+        .catch(error => alert(error.message));
+
+    // $.post("/api/games", {})
+    //     .done(response => {
+    //         console.log(response);
+    //     })
+    //     .fail(err=> console.log(err));
+}
+
+function joinGame() {
+    fetch("../api/games")
+        .then(response => response.json())
+        .then((data) => {
+            let games = data.games;
+            let gameIds = games.map(game=> game.id);
+            let gameIdRandom = gameIds[Math.floor(Math.random()*gameIds.length)];
+            let buttonJoinGame = document.getElementById("joinGame");
+            buttonJoinGame.setAttribute('data-gameId',gameIdRandom);
+            let gameId = buttonJoinGame.getAttribute('data-gameId');
+            fetch(`/api/game/${gameId}/players`, {
+                method: 'POST',
+                body: JSON.stringify({}),
+                headers: new Headers({
+                    contentType: 'application/json'
+                })
+            })
+                .then(response => response.json())
+                .then((data) => {
+                    if(data.gamePlayerId == undefined){
+                        alert(data.message);
+                    } else {
+                    window.location.href = `../web/game.html?gp=${data.gamePlayerId}`;
+                    }
+                })
+                .catch(error => alert(error));
+        })
+        .catch(err => alert(err))
+}
 

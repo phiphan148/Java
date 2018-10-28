@@ -33,10 +33,10 @@ public class Game {
         this.todayDate = new Date();
     }
 
-//    public void addPlayer(GamePlayer gamePlayer){
-//        gamePlayer.setGame(this);
-//        gamePlayers.add(gamePlayer);
-//    }
+    public void addGamePlayer(GamePlayer gamePlayer){
+        gamePlayer.setGame(this);
+        gamePlayers.add(gamePlayer);
+    }
 
     public List<Player> getPlayers() {
         return gamePlayers.stream().map(gamePlayer -> gamePlayer.getPlayer()).collect(toList());

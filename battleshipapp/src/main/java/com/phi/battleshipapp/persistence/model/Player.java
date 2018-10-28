@@ -38,7 +38,7 @@ public class Player {
         this.password = password;
     }
 
-//    public void addGame(GamePlayer gamePlayer){
+//    public void addGamePlayer(GamePlayer gamePlayer){
 //        gamePlayer.setPlayer(this);
 //        gamePlayers.add(gamePlayer);
 //    }

@@ -1,3 +1,7 @@
+body, html {
+    height: 100%;
+}
+
 p, h1, h2, h3, h4, h5, h6, ul, li{
     margin: 0px;
     padding: 0px;
@@ -8,20 +12,22 @@ p, h1, h2, h3, h4, h5, h6, ul, li{
     }
 }
 
+ul li{
+    list-style: none;
+}
+
+a:hover{
+    color: #FFC108;
+    text-decoration: none;
+}
+
 .titleTxt-color{
     color: #fff;
 }
 
 .table-style {
-    border: 1px solid #000;
-    border-collapse: collapse;
     text-align: center;
     background-color: #fff;
-}
-
-.table-style th, tr, td {
-    border: 1px solid #000;
-    border-collapse: collapse;
 }
 
 .table-style td, th {
@@ -37,17 +43,15 @@ p, h1, h2, h3, h4, h5, h6, ul, li{
 }
 
 .bg{
-    background: url("../img/bg.jpg") no-repeat;
-    min-height: 100vh;
+    background: url("../img/bg.jpg") center no-repeat;
+    min-height: 100%;
+    padding-top: 10px;
+    /*height: 100vh;*/
+    background-size: cover;
 }
 
 .nonActive{
     display: none;
-}
-
-.home-page{
-    padding-top: 30px;
-    padding-bottom: 30px;
 }
 
 .form-style input{
@@ -65,4 +69,12 @@ p, h1, h2, h3, h4, h5, h6, ul, li{
 
 .section{
     padding-top: 20px;
+}
+
+#table-score button{
+    border-radius: 3px;
+    outline: none;
+    background-color: white;
+    border: none;
+    cursor: pointer;
 }

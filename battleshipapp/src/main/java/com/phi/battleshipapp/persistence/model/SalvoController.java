@@ -55,26 +55,28 @@ public class SalvoController {
     public Map<String, Object> findGamePlayer(@PathVariable Long nn, Authentication authentication) {
         Map<String, Object> gamePlayer = new LinkedHashMap<>();
         if (!checkLogin(authentication)) {
-            gamePlayer.put("test", null);
-            ResponseEntity<Object> refuse = new ResponseEntity<>("You have no authorise to see this content", HttpStatus.FORBIDDEN);
-            gamePlayer.put("refuse", refuse);
+            ResponseEntity<Object> refuse = new ResponseEntity<>(makeResponseEntityMap("message","Please log in to see this content"), HttpStatus.UNAUTHORIZED);
+            gamePlayer.put("Refuse", refuse.getBody() + " Status:" + refuse.getStatusCodeValue());
         } else {
             List<Long> currentUserGpIds = getCurrentUser(authentication).gamePlayers.stream().map(gp -> gp.getId()).collect(toList());
-            gamePlayer.put("test", currentUserGpIds);
-            for (int i = 0; i < currentUserGpIds.size(); i++) {
-                GamePlayer gamePlayerById = gamePlayerRepo.findById(currentUserGpIds.get(i)).get();
+            gamePlayer.put("CurrentUserGPIds", currentUserGpIds);
+            if (!currentUserGpIds.contains(nn)) {
+                ResponseEntity<Object> refuse = new ResponseEntity<>(makeResponseEntityMap("message","You have no authorise to see this content"), HttpStatus.UNAUTHORIZED);
+                gamePlayer.put("Refuse", refuse.getBody() + " Status:" + refuse.getStatusCodeValue());
+            } else {
+                GamePlayer gamePlayerById = gamePlayerRepo.findById(nn).get();
                 List<Player> playerList = gamePlayerById.getGame().getPlayers();
                 Set<GamePlayer> gamePlayerSet = gamePlayerById.getGame().gamePlayers;
                 List<Player> opponents = opponentList(playerList, gamePlayerById.getPlayer());
 
                 List<List<String>> opponentShipList = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).
-                        getShips().stream().map(ship -> ship.getLocation()).collect(toList());
+                        getShips().stream().map(Ship::getLocation).collect(toList());
 
                 List<List<String>> mainPlayerSalvoLocationList = gamePlayerById.getSalvos()
                         .stream().map(salvo -> salvo.getTurnLocation()).collect(toList());
 
                 List<String> mainPlayerSalvoLocation = mainPlayerSalvoLocationList.stream()
-                        .flatMap(x -> x.stream())
+                        .flatMap(Collection::stream)
                         .collect(Collectors.toList());
 
                 List<String> opponentShip = opponentShipList.stream()
@@ -83,8 +85,8 @@ public class SalvoController {
 
                 List<String> opponentShipGetHit = new ArrayList<>();
 
-                for(int j=0; j<mainPlayerSalvoLocation.size(); j++){
-                    if(opponentShip.contains(mainPlayerSalvoLocation.get(j))){
+                for (int j = 0; j < mainPlayerSalvoLocation.size(); j++) {
+                    if (opponentShip.contains(mainPlayerSalvoLocation.get(j))) {
                         opponentShipGetHit.add(mainPlayerSalvoLocation.get(j));
                     }
                 }
@@ -96,6 +98,7 @@ public class SalvoController {
                 gamePlayer.put("mainPlayerSalvos", salvoList(gamePlayerById.getSalvos()));
                 gamePlayer.put("opponentShipGetHit", opponentShipGetHit);
                 gamePlayer.put("opponentSalvos", salvoList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getSalvos()));
+
             }
         }
 
@@ -106,16 +109,16 @@ public class SalvoController {
     private PasswordEncoder passwordEncoder;
 
     @RequestMapping(value = "/players", method = RequestMethod.POST)
-    public ResponseEntity<Object> register(
+    public ResponseEntity<Map<String, Object>> register(
             @RequestParam String firstname, @RequestParam String lastname,
             @RequestParam String username, @RequestParam String password) {
 
         if (firstname.isEmpty() || lastname.isEmpty() || username.isEmpty() || password.isEmpty()) {
-            return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(makeResponseEntityMap("error", "Missing data"), HttpStatus.FORBIDDEN);
         }
 
         if (playerRepo.findByUsername(username) != null) {
-            return new ResponseEntity<>("Email already in use", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(makeResponseEntityMap("error", "Email already in use"), HttpStatus.FORBIDDEN);
         }
 
         playerRepo.save(new Player(firstname, lastname, username, passwordEncoder.encode(password)));
@@ -125,7 +128,68 @@ public class SalvoController {
     @RequestMapping(value = "/players", method = RequestMethod.GET)
     public List<String> test() {
         return playerRepo.findAll()
-                .stream().map(player -> player.getUsername()).collect(toList());
+                .stream().map(Player::getUsername).collect(toList());
+    }
+
+    @RequestMapping(value = "/games", method = RequestMethod.POST)
+    public ResponseEntity<Object> addGame(Authentication authentication) {
+        if (!checkLogin(authentication)) {
+            return new ResponseEntity<>(makeResponseEntityMap("message","Please log in to add new game"), HttpStatus.UNAUTHORIZED);
+        }
+
+        //1st WAY
+        Game newGame = new Game();
+
+        GamePlayer gamePlayerThisGame = new GamePlayer();
+        gamePlayerThisGame.setPlayer(getCurrentUser(authentication));
+        gamePlayerRepo.save(gamePlayerThisGame);
+
+        newGame.addGamePlayer(gamePlayerThisGame);
+        gameRepo.save(newGame);
+
+//        Game newGame = new Game();
+//        gameRepo.save(newGame);
+//
+//        GamePlayer gamePlayerThisGame = new GamePlayer(newGame, getCurrentUser(authentication));
+//        gamePlayerRepo.save(gamePlayerThisGame);
+//
+//        gameRepo.save(newGame);
+
+//        return ResponseEntity.ok()
+//                .header("Custom-Header", "foo")
+//                .body("Custom header set");
+        return new ResponseEntity<>(makeResponseEntityMap("gamePlayerId", gamePlayerThisGame.getId()),HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/game/{gameId}/players", method = RequestMethod.POST)
+    public ResponseEntity<Object> joinGame(@PathVariable Long gameId, Authentication authentication) {
+        if (!checkLogin(authentication)) {
+            return new ResponseEntity<>(makeResponseEntityMap("message", "Please log in to join new game"), HttpStatus.UNAUTHORIZED);
+        }
+
+        List<Long> GameIds = gameRepo.findAll().stream().map(game -> game.getId()).collect(toList());
+        if(!GameIds.contains(gameId)){
+            return new ResponseEntity<>(makeResponseEntityMap("message", "There is no game you have chosen"), HttpStatus.FORBIDDEN);
+        }
+
+        Game gameGetChosen = gameRepo.getOne(gameId);
+        if(gameGetChosen.getPlayers().size()>=2){
+            return new ResponseEntity<>(makeResponseEntityMap("message", "The game you have chosen is full"), HttpStatus.FORBIDDEN);
+        }
+
+        if(gameGetChosen.getPlayers().contains(getCurrentUser(authentication))){
+            return new ResponseEntity<>(makeResponseEntityMap("message", "You are already join this game"), HttpStatus.FORBIDDEN);
+        }
+
+        GamePlayer newGamePlayer = new GamePlayer(gameGetChosen, getCurrentUser(authentication));
+        gamePlayerRepo.save(newGamePlayer);
+
+        return new ResponseEntity<>(makeResponseEntityMap("gamePlayerId", newGamePlayer.getId()),HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/game/{gameId}/players", method = RequestMethod.GET)
+    public List<Map<String, Object>> gameHasBeenJoin(@PathVariable Long gameId) {
+        return playerList(gameRepo.findById(gameId).get().getPlayers());
     }
 
     private GamePlayer getGamePlayerOpponent(Set<GamePlayer> gamePlayers, GamePlayer gamePlayer) {
@@ -224,6 +288,12 @@ public class SalvoController {
         } else {
             return true;
         }
+    }
+
+    private Map<String, Object> makeResponseEntityMap(String key, Object value) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(key, value);
+        return map;
     }
 
 }
