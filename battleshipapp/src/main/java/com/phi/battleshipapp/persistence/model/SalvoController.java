@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -51,21 +52,52 @@ public class SalvoController {
     }
 
     @RequestMapping("/game_view/{nn}")
-    public Map<String, Object> findGamePlayer(@PathVariable Long nn) {
+    public Map<String, Object> findGamePlayer(@PathVariable Long nn, Authentication authentication) {
         Map<String, Object> gamePlayer = new LinkedHashMap<>();
+        if (!checkLogin(authentication)) {
+            gamePlayer.put("test", null);
+            ResponseEntity<Object> refuse = new ResponseEntity<>("You have no authorise to see this content", HttpStatus.FORBIDDEN);
+            gamePlayer.put("refuse", refuse);
+        } else {
+            List<Long> currentUserGpIds = getCurrentUser(authentication).gamePlayers.stream().map(gp -> gp.getId()).collect(toList());
+            gamePlayer.put("test", currentUserGpIds);
+            for (int i = 0; i < currentUserGpIds.size(); i++) {
+                GamePlayer gamePlayerById = gamePlayerRepo.findById(currentUserGpIds.get(i)).get();
+                List<Player> playerList = gamePlayerById.getGame().getPlayers();
+                Set<GamePlayer> gamePlayerSet = gamePlayerById.getGame().gamePlayers;
+                List<Player> opponents = opponentList(playerList, gamePlayerById.getPlayer());
 
-        GamePlayer gamePlayerById = gamePlayerRepo.findById(nn).get();
-        List<Player> playerList = gamePlayerById.getGame().getPlayers();
-        Set<GamePlayer> gamePlayerSet = gamePlayerById.getGame().gamePlayers;
-        List<Player> opponents = opponentList(playerList, gamePlayerById.getPlayer());
+                List<List<String>> opponentShipList = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).
+                        getShips().stream().map(ship -> ship.getLocation()).collect(toList());
 
-        gamePlayer.put("game", makeGameMap(gamePlayerById.getGame()));
-        gamePlayer.put("mainPlayer", makePlayerMap(gamePlayerById.getPlayer()));
-        gamePlayer.put("opponent", playerList(opponents));
-        gamePlayer.put("mainPlayerShips", shipsList(gamePlayerById.getShips()));
-        gamePlayer.put("mainPlayerSalvos", salvoList(gamePlayerById.getSalvos()));
-//        gamePlayer.put("opponentShips", shipsList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getShips()));
-        gamePlayer.put("opponentSalvos", salvoList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getSalvos()));
+                List<List<String>> mainPlayerSalvoLocationList = gamePlayerById.getSalvos()
+                        .stream().map(salvo -> salvo.getTurnLocation()).collect(toList());
+
+                List<String> mainPlayerSalvoLocation = mainPlayerSalvoLocationList.stream()
+                        .flatMap(x -> x.stream())
+                        .collect(Collectors.toList());
+
+                List<String> opponentShip = opponentShipList.stream()
+                        .flatMap(x -> x.stream())
+                        .collect(Collectors.toList());
+
+                List<String> opponentShipGetHit = new ArrayList<>();
+
+                for(int j=0; j<mainPlayerSalvoLocation.size(); j++){
+                    if(opponentShip.contains(mainPlayerSalvoLocation.get(j))){
+                        opponentShipGetHit.add(mainPlayerSalvoLocation.get(j));
+                    }
+                }
+
+                gamePlayer.put("game", makeGameMap(gamePlayerById.getGame()));
+                gamePlayer.put("mainPlayer", makePlayerMap(gamePlayerById.getPlayer()));
+                gamePlayer.put("opponent", playerList(opponents));
+                gamePlayer.put("mainPlayerShips", shipsList(gamePlayerById.getShips()));
+                gamePlayer.put("mainPlayerSalvos", salvoList(gamePlayerById.getSalvos()));
+                gamePlayer.put("opponentShipGetHit", opponentShipGetHit);
+                gamePlayer.put("opponentSalvos", salvoList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getSalvos()));
+            }
+        }
 
         return gamePlayer;
     }
@@ -90,6 +122,12 @@ public class SalvoController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @RequestMapping(value = "/players", method = RequestMethod.GET)
+    public List<String> test() {
+        return playerRepo.findAll()
+                .stream().map(player -> player.getUsername()).collect(toList());
+    }
+
     private GamePlayer getGamePlayerOpponent(Set<GamePlayer> gamePlayers, GamePlayer gamePlayer) {
         Stream<GamePlayer> gamePlayerOpponents = gamePlayers.stream()
                 .filter(gp -> !gp.equals(gamePlayer));
@@ -106,7 +144,7 @@ public class SalvoController {
     private Map<String, Object> makeSalvoMap(Salvo salvo) {
         Map<String, Object> salvoMap = new LinkedHashMap<>();
         salvoMap.put("turn", salvo.getTurn());
-        salvoMap.put("player", salvo.getGamePlayer().getPlayer().getId());
+//        salvoMap.put("player", salvo.getGamePlayer().getPlayer().getId());
         salvoMap.put("location", salvo.getTurnLocation());
         return salvoMap;
     }

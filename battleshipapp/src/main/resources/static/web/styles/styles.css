@@ -1,3 +1,7 @@
+p, h1, h2, h3, h4, h5, h6, ul, li{
+    margin: 0px;
+    padding: 0px;
+}
 @media only screen and (min-width: 576px) and (max-width: 992px) {
     .table-style td, th {
         min-width: 30px !important;
@@ -37,6 +41,28 @@
     min-height: 100vh;
 }
 
-#welcome{
+.nonActive{
     display: none;
+}
+
+.home-page{
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.form-style input{
+    border-radius: 3px;
+    border: none;
+    outline: none;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.button{
+    border-radius: 3px;
+    outline: none;
+}
+
+.section{
+    padding-top: 20px;
 }

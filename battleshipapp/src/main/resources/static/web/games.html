@@ -8,23 +8,62 @@
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
           integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css"
+          integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
     <link rel="stylesheet" href="/web/styles/styles.css">
     <title>Player Manager</title>
 </head>
-<body>
+<body onload="checkLogin()">
 <div class="bg">
-    <div class="container">
-        <p id="welcome">Hi <span id="playerLoginName"></span>!</p>
-        <form class="row" id="login-form" onsubmit="return false">
-            <label class="col-12">Email/Username: <input id="usernameLogin" type="text" name="usernameLogin"></label>
-            <label class="col-12">Password: <input id="passwordLogin" type="password" name="passwordLogin"></label>
-            <button onclick="login()">Log in</button>
-        </form>
-        <form id="logout-form" onsubmit="return false">
-            <button onclick="logout()">Log out</button>
-        </form>
-        <div>
+    <div class="container home-page">
+        <div id="welcome">
+            <p class="text-warning font-weight-bold">Hi <span id="playerLoginName"></span>!</p>
+            <form id="logout-form" onsubmit="return false">
+                <span class="titleTxt-color"><i onclick="logout()" class="fas fa-power-off"
+                                                style="cursor: pointer; margin-right: 3px"></i>Log out here</span>
+            </form>
+        </div>
+
+        <div id="form-logIn-register" style="width: 80%; margin: 0px auto" class="form-style titleTxt-color">
+            <form id="login-form" onsubmit="return false">
+                <div class="row">
+                    <div class="row col-12 text-center">
+                        <p class="col-3">Email:</p>
+                        <input class="col-9 col-sm-8 " id="usernameLogin" type="text" name="usernameLogin">
+                    </div>
+                    <div class="row col-12 text-center">
+                        <p class="col-3">Password:</p>
+                        <input class="col-9 col-sm-8" id="passwordLogin" type="password"
+                               name="passwordLogin">
+                    </div>
+                    <button style="margin: 0px auto" class="button col-4 col-sm-3 col-md-2" onclick="login('usernameLogin','passwordLogin')">Log in</button>
+                </div>
+            </form>
+            <form id="register-form" onsubmit="return false" class="section">
+                <div class="row">
+                    <div class="row col-12 text-center">
+                        <p class="col-3">First Name:</p>
+                        <input class="col-9 col-sm-8 " id="firstNameRegister" type="text" name="firstNameRegister">
+                    </div>
+                    <div class="row col-12 text-center">
+                        <p class="col-3">Last Name:</p>
+                        <input class="col-9 col-sm-8" id="lastNameRegister" type="text" name="lastNameRegister">
+                    </div>
+                    <div class="row col-12 text-center">
+                        <p class="col-3">Email:</p>
+                        <input class="col-9 col-sm-8" id="usernameRegister" type="text" name="usernameRegister">
+                    </div>
+                    <div class="row col-12 text-center">
+                        <p class="col-3">Password:</p>
+                        <input class="col-9 col-sm-8" id="passwordRegister" type="password" name="passwordRegister">
+                    </div>
+                    <button style="margin: 0px auto" class="button col-4 col-sm-3 col-md-2" onclick="register()">Register</button>
+                </div>
+            </form>
+        </div>
+        <div id="table-score">
             <h1 class="pb-3 titleTxt-color pt-3">Player Manager</h1>
+            <span id="link-to-reenter-game"></span>
             <table id="score-table" class="table-style padding-cell"></table>
         </div>
     </div>
@@ -39,7 +78,6 @@
         integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-2.2.0.js"></script>
-<script src="/web/scripts/authentic.js"></script>
 <script src="/web/scripts/games.js"></script>
 
 </body>

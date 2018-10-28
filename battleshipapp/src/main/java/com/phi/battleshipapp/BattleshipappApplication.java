@@ -73,7 +73,7 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
             gamePlayerRepository.save(gamePlayer4);
 
             List<String> location1 = Arrays.asList("A3", "C2", "G1");
-            List<String> location2 = Arrays.asList("G1", "F1", "G3");
+            List<String> location2 = Arrays.asList("G1", "F4", "G3", "D6", "A3", "I2", "J4", "D5");
             List<String> location3 = Arrays.asList("G5", "D6", "B4");
 
             Ship ship1 = new Ship("cruiser", gamePlayer1, location1);
@@ -176,6 +176,7 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/rest/**").hasAuthority("ADMIN")
+//                .antMatchers("/api/game_view/**").hasAuthority("USER")
 //                .antMatchers("/rest/**").hasAuthority("USER")
 //                .antMatchers("/api/**").hasAuthority("ADMIN")
 //                .antMatchers("/api/**").hasAuthority("USER")

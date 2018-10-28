@@ -11,9 +11,15 @@
     <link rel="stylesheet" href="/web/styles/styles.css">
     <title>Game view</title>
 </head>
-<body>
+<body onload="checkLoginForGame()">
 <div class="bg">
-    <div class="container pb-3">
+    <div class="container pb-3 pt-3">
+        <div id="welcome">
+            <p class="text-warning font-weight-bold">Hi <span id="playerLoginName"></span>!</p>
+            <form action="/games.html" id="logout-form" onsubmit="return false">
+                <span class="titleTxt-color"><i onclick="logout()" class="fas fa-power-off" style="cursor: pointer; margin-right: 3px"></i>Log out here</span>
+            </form>
+        </div>
         <h1 class="titleTxt-color pt-3">Game View</h1>
         <p class="titleTxt-color"><span class="font-weight-bold text-warning">Created game:</span> <span id="created"></span></p>
         <div class="row titleTxt-color">
@@ -30,9 +36,9 @@
                 <table id="salvo-grid" class="table-style" style="height: 400px"></table>
             </div>
         </div>
-        <form action="/games.html" id="logout-form" onsubmit="return false">
-            <button onclick="logout()">Log out</button>
-        </form>
+        <!--<form action="/games.html" id="logout-form" onsubmit="return false">-->
+            <!--<button onclick="logout()">Log out</button>-->
+        <!--</form>-->
     </div>
 </div>
 
@@ -46,7 +52,6 @@
         integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-2.2.0.js"></script>
-<script src="/web/scripts/authentic.js"></script>
 <script src="/web/scripts/game.js"></script>
 </body>
 </html>
