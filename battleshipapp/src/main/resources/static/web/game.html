@@ -26,6 +26,50 @@
             <p class="col-6"><span class="font-weight-bold text-warning">Main player:</span> <span id="main-player"></span></p>
             <p class="col-6"><span class="font-weight-bold text-warning">Opponent:</span> <span id="opponent"></span></p>
         </div>
+        <div class="table-responsive mt-2">
+            <table class="table table-bordered table-style">
+                <tr>
+                    <th></th>
+                    <th>Number of ship</th>
+                    <th>Type</th>
+                    <th>Length</th>
+                </tr>
+                <tr>
+                    <td><input type="radio" onclick="getShipType()" name="ship" id="carrier" data-shiptype="Aircraft Carrier" data-shiplength="5"></td>
+                    <td>1</td>
+                    <td>Aircraft Carrier</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td><input type="radio" onclick="getShipType()" name="ship" id="battleship" data-shiptype="Battleship" data-shiplength="4"></td>
+                    <td>1</td>
+                    <td>Battleship</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td><input type="radio" onclick="getShipType()" name="ship" id="submarine" data-shiptype="Submarine" data-shiplength="3"></td>
+                    <td>1</td>
+                    <td>Submarine</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><input type="radio" onclick="getShipType()" name="ship" id="destroyer" data-shiptype="destroyer" data-shiplength="3"></td>
+                    <td>1</td>
+                    <td>Destroyer</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td><input type="radio" onclick="getShipType()" name="ship" id="patrol" data-shiptype="Patrol Boat" data-shiplength="2"></td>
+                    <td>1</td>
+                    <td>Patrol Boat</td>
+                    <td>2</td>
+                </tr>
+            </table>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label class="titleTxt-color">Place ship in horizontal</label><input onclick="getDirection()" name="direction" data-direction="horizontal" type="radio" class="col"/>
+            <label class="titleTxt-color">Place ship in vertical</label><input onclick="getDirection()" name="direction" data-direction="vertical" type="radio" class="col"/>
+        </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-md-6 pt-2">
                 <h3 class="titleTxt-color">Ships</h3>
@@ -40,9 +84,7 @@
                 </div>
             </div>
         </div>
-        <!--<form action="/games.html" id="logout-form" onsubmit="return false">-->
-            <!--<button onclick="logout()">Log out</button>-->
-        <!--</form>-->
+        <div id="ships-to-add"></div>
     </div>
 </div>
 

@@ -3,6 +3,7 @@ package com.phi.battleshipapp.persistence.model;
 import com.phi.battleshipapp.persistence.repo.GamePlayerRepository;
 import com.phi.battleshipapp.persistence.repo.GameRepository;
 import com.phi.battleshipapp.persistence.repo.PlayerRepository;
+import com.phi.battleshipapp.persistence.repo.ShipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,9 @@ public class SalvoController {
 
     @Autowired
     private PlayerRepository playerRepo;
+
+    @Autowired
+    private ShipRepository shipRepo;
 
     @RequestMapping(value = "/games", method = RequestMethod.GET)
     public Map<String, Object> makeGameMapWithCurrentUser(Authentication authentication) {
@@ -126,7 +130,7 @@ public class SalvoController {
     }
 
     @RequestMapping(value = "/players", method = RequestMethod.GET)
-    public List<String> test() {
+    public List<String> playerUserNameList() {
         return playerRepo.findAll()
                 .stream().map(Player::getUsername).collect(toList());
     }
@@ -185,6 +189,58 @@ public class SalvoController {
         gamePlayerRepo.save(newGamePlayer);
 
         return new ResponseEntity<>(makeResponseEntityMap("gamePlayerId", newGamePlayer.getId()),HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/games/players/{gamePlayerId}/ships", method = RequestMethod.POST)
+    public ResponseEntity<Object> addNewShip(@PathVariable Long gamePlayerId, @RequestBody Ship ship, Authentication authentication) {
+        if (!checkLogin(authentication)) {
+            return new ResponseEntity<>(makeResponseEntityMap("message", "Please log in to create new ships"), HttpStatus.UNAUTHORIZED);
+        }
+
+        List<Long> gamePlayerIds = gamePlayerRepo.findAll().stream().map(gp -> gp.getId()).collect(toList());
+        if(!gamePlayerIds.contains(gamePlayerId)){
+            return new ResponseEntity<>(makeResponseEntityMap("message", "There is no game player with the given ID"), HttpStatus.UNAUTHORIZED);
+        }
+
+        GamePlayer gamePlayerById = gamePlayerRepo.findById(gamePlayerId).get();
+        Player playerByGpId = gamePlayerById.getPlayer();
+        if(playerByGpId.getId() != getCurrentUser(authentication).getId()){
+            return new ResponseEntity<>(makeResponseEntityMap("message", "You are not authorise to create new ships"), HttpStatus.UNAUTHORIZED);
+        }
+
+        if(gamePlayerById.ships.size()>=4){
+            return new ResponseEntity<>(makeResponseEntityMap("message", "You cannot create more than 4 ships"), HttpStatus.FORBIDDEN);
+        }
+
+
+        ship.setGamePlayer(gamePlayerById);
+        List<List<String>> shipLocation = gamePlayerById.ships.stream().map(shipinlist->shipinlist.getLocation()).collect(toList());
+        List<String> mainPlayerShipLocation = shipLocation.stream()
+                .flatMap(location->location.stream()).collect(toList());
+
+        if(gamePlayerById.ships.stream().map(shipinList->shipinList.getShipType()).collect(toList()).contains(ship.getShipType())){
+            return new ResponseEntity<>(makeResponseEntityMap("message", "Ship already was added before"), HttpStatus.FORBIDDEN);
+        }
+
+        List<String> overlapShip = new ArrayList<>();
+        for(int i=0; i<ship.getLocation().size(); i++){
+            if(mainPlayerShipLocation.contains(ship.getLocation().get(i))){
+                overlapShip.add(ship.getLocation().get(i));
+            }
+        }
+
+        if(overlapShip.size()>0){
+            return new ResponseEntity<>(makeResponseEntityMap("Overlapships", overlapShip), HttpStatus.FORBIDDEN);
+        } else {
+            shipRepo.save(ship);
+        }
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/games/players/{gamePlayerId}/ships", method = RequestMethod.GET)
+    public List<Map<String, Object>> shipsNewCreate(@PathVariable Long gamePlayerId) {
+        return shipsList(gamePlayerRepo.findById(gamePlayerId).get().ships);
     }
 
     @RequestMapping(value = "/game/{gameId}/players", method = RequestMethod.GET)

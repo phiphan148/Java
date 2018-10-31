@@ -16,15 +16,22 @@ function mainGame() {
             let opponentSalvos = gamePlayerData.opponentSalvos;
             let opponentShipGetHit = gamePlayerData.opponentShipGetHit;
 
-            gridCreate("ship-grid");
-            gridCreate("salvo-grid");
-            displayInfo(gamePlayerData);
-            displayGridShip(mainPlayerShips, opponentSalvos);
-            displaySalvoGrid(mainPlayerSalvos, opponentShipGetHit);
+            if (gamePlayerData.mainPlayer == null) {
+                window.location.href = "../web/games.html";
+            } else {
+                document.getElementById('ships-to-add').innerHTML = `<button onclick="createShip(${gpId})">Add ship</button>`;
+
+                gridCreate("ship-grid");
+                gridCreate("salvo-grid");
+                displayInfo(gamePlayerData);
+                displayGridShip(mainPlayerShips, opponentSalvos);
+                displaySalvoGrid(mainPlayerSalvos, opponentShipGetHit);
+            }
 
         })
         .catch(err => console.log(err))
 }
+
 mainGame();
 
 function displayInfo(gamePlayerData) {
@@ -63,16 +70,16 @@ function gridCreate(tableId) {
     for (let j = 1; j < firstrow.length; j++) {
         tbodycontent += `<tr>
                                 <th class=${firstcol[j]}0>${firstcol[j]}</th>
-                                <td class=${firstcol[j]}1></td>
-                                <td class=${firstcol[j]}2></td>
-                                <td class=${firstcol[j]}3></td>
-                                <td class=${firstcol[j]}4></td>
-                                <td class=${firstcol[j]}5></td>
-                                <td class=${firstcol[j]}6></td>
-                                <td class=${firstcol[j]}7></td>
-                                <td class=${firstcol[j]}8></td>
-                                <td class=${firstcol[j]}9></td>
-                                <td class=${firstcol[j]}10></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}1" class=${firstcol[j]}1></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}2" class=${firstcol[j]}2></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}3" class=${firstcol[j]}3></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}4" class=${firstcol[j]}4></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}5" class=${firstcol[j]}5></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}6" class=${firstcol[j]}6></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}7" class=${firstcol[j]}7></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}8" class=${firstcol[j]}8></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}9" class=${firstcol[j]}9></td>
+                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}10" class=${firstcol[j]}10></td>
                             </tr>`
     }
     table.appendChild(tbody).innerHTML = tbodycontent;
@@ -105,7 +112,7 @@ function displayGridShip(ships, opponentSalvos) {
 function displaySalvoGrid(salvos, opponentShipGetHit) {
     if (salvos.length > 0) {
         for (let i = 0; i < salvos.length; i++) {
-                let shots = salvos[i].turn;
+            let shots = salvos[i].turn;
             for (let j = 0; j < salvos[i].location.length; j++) {
                 document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.background = "green";
                 document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).innerHTML = shots;
@@ -140,3 +147,101 @@ function logout() {
         })
         .fail(err => alert(err.responseText));
 }
+
+var shipChooseType = "";
+var shipLength = 0;
+
+function getShipType() {
+    let radioCheckList = document.getElementsByName("ship");
+    shipChooseType = "";
+    shipLength = 0;
+    radioCheckList.forEach(check => {
+        if (check.checked == true) {
+            shipChooseType = check.getAttribute("data-shiptype");
+            shipLength = parseInt(check.getAttribute("data-shiplength"));
+        }
+    });
+}
+
+var shipDirecttion = "";
+
+function getDirection() {
+    let radioCheckList = document.getElementsByName("direction");
+    shipDirecttion = "";
+    radioCheckList.forEach(check => {
+        if (check.checked == true) {
+            shipDirecttion = check.getAttribute("data-direction");
+        }
+    });
+}
+
+var shipBow = "";
+function chooseLocation(className) {
+    shipBow = "";
+    if(className.style.background != "blue"){
+        shipBow = className.getAttribute("data-classname");
+        console.log(className);
+        console.log(shipBow);
+    }
+}
+
+function createShip(gamePlayerId) {
+    if (shipChooseType != "" && shipDirecttion != "" && shipBow != "") {
+        let location = [];
+        if (shipDirecttion == 'horizontal') {
+            let num = parseInt(shipBow.charAt(1));
+            console.log(num);
+            console.log(shipLength);
+            if (num + shipLength > 11) {
+                alert("Your ship location is out of grid, please place ship again");
+            } else {
+                for (let i = 0; i < shipLength; i++) {
+                    location.push(shipBow.charAt(0).concat(num + i));
+                }
+            }
+            console.log(shipLength);
+            console.log(location);
+        } else {
+            let letter = shipBow.charCodeAt(0);
+            if (letter + shipLength > 75) {
+                alert("Your ship location is out of grid, please place ship again");
+            } else {
+                for (let i = 0; i < shipLength; i++) {
+                    location.push(String.fromCharCode(letter + i).toUpperCase().concat(shipBow.charAt(1)));
+                }
+            }
+            console.log(letter);
+            console.log(shipLength);
+        }
+        if (location != "") {
+            let data = {shipType: `${shipChooseType}`, location: location};
+            $.post({
+                url: `/api/games/players/${gamePlayerId}/ships`,
+                data: JSON.stringify(data),
+                dataType: "text",
+                contentType: "application/json"
+            })
+                .done(jqXHR => window.location.href = `../web/game.html?gp=${gamePlayerId}`)
+                .fail((jqXHR, status) => alert(status + " " + jqXHR.responseText))
+        }
+    } else {
+        alert('Please make sure you choose ship type, direction and location');
+    }
+
+
+}
+
+
+//JAVASCRiPT POST
+// function createShip(gamePlayerId) {
+//     let data = {shipType: "destroyer", location:["A1", "B1", "C1"]};
+//     fetch(`/api/games/players/${gamePlayerId}/ships`, {
+//         method: 'POST',
+//         body: JSON.stringify({data}),
+//         headers: new Headers({
+//             contentType: 'application/json'
+//         })
+//     })
+//         .then(response => console.log("Request complete! response:", response))
+//         .catch(error => alert(error))
+// }

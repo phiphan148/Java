@@ -78,3 +78,8 @@ a:hover{
     border: none;
     cursor: pointer;
 }
+
+#ship-grid td:active, td:focus{
+    background-color: yellow;
+    outline: none;
+}

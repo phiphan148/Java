@@ -81,9 +81,9 @@ function checkLogin() {
                         }
                     })
                 }
-                if(gameListCurrentUser.length>0){
+                if (gameListCurrentUser.length > 0) {
                     document.getElementById("current-game").innerHTML = `<p style="color: #f7ff00">You have ${gameListCurrentUser.length} current games:</p>`;
-                    gameListCurrentUser.forEach(gamePlayer=>{
+                    gameListCurrentUser.forEach(gamePlayer => {
                         linkRejoinGame += `<li><a style="color: #f7ff00" target="_blank" href="../web/game.html?gp=${gamePlayer.id}">Click here to re-enter your game</a></li>`;
                     })
                 }
@@ -152,12 +152,6 @@ function addGame() {
             window.location.href = `../web/game.html?gp=${data.gamePlayerId}`;
         })
         .catch(error => alert(error.message));
-
-    // $.post("/api/games", {})
-    //     .done(response => {
-    //         console.log(response);
-    //     })
-    //     .fail(err=> console.log(err));
 }
 
 function joinGame() {
@@ -165,28 +159,50 @@ function joinGame() {
         .then(response => response.json())
         .then((data) => {
             let games = data.games;
-            let gameIds = games.map(game=> game.id);
-            let gameIdRandom = gameIds[Math.floor(Math.random()*gameIds.length)];
-            let buttonJoinGame = document.getElementById("joinGame");
-            buttonJoinGame.setAttribute('data-gameId',gameIdRandom);
-            let gameId = buttonJoinGame.getAttribute('data-gameId');
-            fetch(`/api/game/${gameId}/players`, {
-                method: 'POST',
-                body: JSON.stringify({}),
-                headers: new Headers({
-                    contentType: 'application/json'
-                })
-            })
-                .then(response => response.json())
-                .then((data) => {
-                    if(data.gamePlayerId == undefined){
-                        alert(data.message);
-                    } else {
-                    window.location.href = `../web/game.html?gp=${data.gamePlayerId}`;
-                    }
-                })
-                .catch(error => alert(error));
+            let gamesToJoin = [];
+            if (data.currentPlayer != null) {
+                let gamesFilter = games.filter(game => game.gamePlayers.length < 2);
+                gamesFilter.forEach(game => {
+                    game.gamePlayers.forEach(gp => {
+                        if (gp.player.id != data.currentPlayer.id) {
+                            gamesToJoin.push(game)
+                        }
+                    })
+                });
+            }
+            if (gamesToJoin.length > 0) {
+                let gameIds = gamesToJoin.map(game => game.id);
+                let gameIdRandom = gameIds[Math.floor(Math.random() * gameIds.length)];
+                document.getElementById("joinGame").style.display = "block";
+                let buttonJoinGame = document.getElementById("joinGame");
+                buttonJoinGame.setAttribute('data-gameId', gameIdRandom);
+            } else {
+                document.getElementById("joinGame").style.display = "none";
+            }
         })
         .catch(err => alert(err))
+}
+joinGame();
+
+function clickJoin() {
+    let gameIdRandom = document.getElementById("joinGame").getAttribute('data-gameId');
+    fetch(`/api/game/${gameIdRandom}/players`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+        headers: new Headers({
+            contentType: 'application/json'
+        })
+    })
+        .then(response => response.json())
+        .then((data) => {
+            console.log(data.gamePlayerId);
+            window.location.href = `../web/game.html?gp=${data.gamePlayerId}`;
+            // if (data.gamePlayerId == undefined) {
+            //     alert(data.message);
+            // } else {
+            //     window.location.href = `../web/game.html?gp=${data.gamePlayerId}`;
+            // }
+        })
+        .catch(error => alert(error));
 }
 
