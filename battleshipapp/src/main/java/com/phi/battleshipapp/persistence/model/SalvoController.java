@@ -1,9 +1,6 @@
 package com.phi.battleshipapp.persistence.model;
 
-import com.phi.battleshipapp.persistence.repo.GamePlayerRepository;
-import com.phi.battleshipapp.persistence.repo.GameRepository;
-import com.phi.battleshipapp.persistence.repo.PlayerRepository;
-import com.phi.battleshipapp.persistence.repo.ShipRepository;
+import com.phi.battleshipapp.persistence.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +29,9 @@ public class SalvoController {
 
     @Autowired
     private ShipRepository shipRepo;
+
+    @Autowired
+    private SalvoRepository salvoRepo;
 
     @RequestMapping(value = "/games", method = RequestMethod.GET)
     public Map<String, Object> makeGameMapWithCurrentUser(Authentication authentication) {
@@ -208,7 +208,7 @@ public class SalvoController {
             return new ResponseEntity<>(makeResponseEntityMap("message", "You are not authorise to create new ships"), HttpStatus.UNAUTHORIZED);
         }
 
-        if(gamePlayerById.ships.size()>=4){
+        if(gamePlayerById.ships.size()>5){
             return new ResponseEntity<>(makeResponseEntityMap("message", "You cannot create more than 4 ships"), HttpStatus.FORBIDDEN);
         }
 
@@ -233,6 +233,51 @@ public class SalvoController {
             return new ResponseEntity<>(makeResponseEntityMap("Overlapships", overlapShip), HttpStatus.FORBIDDEN);
         } else {
             shipRepo.save(ship);
+        }
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/games/players/{gamePlayerId}/salvos", method = RequestMethod.POST)
+    public ResponseEntity<Object> addNewSalvo(@PathVariable Long gamePlayerId, @RequestBody Salvo salvo, Authentication authentication) {
+        if (!checkLogin(authentication)) {
+            return new ResponseEntity<>(makeResponseEntityMap("message", "Please log in to create new ships"), HttpStatus.UNAUTHORIZED);
+        }
+
+        List<Long> gamePlayerIds = gamePlayerRepo.findAll().stream().map(gp -> gp.getId()).collect(toList());
+        if(!gamePlayerIds.contains(gamePlayerId)){
+            return new ResponseEntity<>(makeResponseEntityMap("message", "There is no game player with the given ID"), HttpStatus.UNAUTHORIZED);
+        }
+
+        GamePlayer gamePlayerById = gamePlayerRepo.findById(gamePlayerId).get();
+        Player playerByGpId = gamePlayerById.getPlayer();
+        if(playerByGpId.getId() != getCurrentUser(authentication).getId()){
+            return new ResponseEntity<>(makeResponseEntityMap("message", "You are not authorise to create new ships"), HttpStatus.UNAUTHORIZED);
+        }
+
+        salvo.setGamePlayer(gamePlayerById);
+        salvo.setTurn(3);
+
+        List<List<String>> salvoLocation = gamePlayerById.salvos.stream().map(salvoL->salvoL.getTurnLocation()).collect(toList());
+        List<String> mainPlayerSalvoLocation = salvoLocation.stream()
+                .flatMap(location->location.stream()).collect(toList());
+
+        List<String> overlapSalvo = new ArrayList<>();
+        for(int i=0; i<salvo.getTurnLocation().size(); i++){
+            if(mainPlayerSalvoLocation.contains(salvo.getTurnLocation().get(i))){
+                overlapSalvo.add(salvo.getTurnLocation().get(i));
+            }
+        }
+
+        List<Integer> salvoTurn = gamePlayerById.salvos.stream().map(salvoL->salvoL.getTurn()).collect(toList());
+        if(salvoTurn.contains(salvo.getTurn())){
+            return new ResponseEntity<>(makeResponseEntityMap("Cannot use this turn", salvo.getTurn()), HttpStatus.FORBIDDEN);
+        }
+
+        if(overlapSalvo.size()>0){
+            return new ResponseEntity<>(makeResponseEntityMap("OverlapSalvo", overlapSalvo), HttpStatus.FORBIDDEN);
+        } else {
+            salvoRepo.save(salvo);
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);

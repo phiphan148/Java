@@ -3,12 +3,16 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0, shrink-to-fit=no">
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
           integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <link rel="stylesheet" href="/web/styles/styles.css">
+    
     <title>Game view</title>
 </head>
 <body onload="checkLoginForGame()">
@@ -53,7 +57,7 @@
                     <td>3</td>
                 </tr>
                 <tr>
-                    <td><input type="radio" onclick="getShipType()" name="ship" id="destroyer" data-shiptype="destroyer" data-shiplength="3"></td>
+                    <td><input type="radio" onclick="getShipType()" name="ship" id="destroyer" data-shiptype="Destroyer" data-shiplength="3"></td>
                     <td>1</td>
                     <td>Destroyer</td>
                     <td>3</td>
@@ -76,15 +80,16 @@
                 <div class="table-responsive mt-2">
                     <table id="ship-grid" class="table table-bordered table-style padding-cell" style="height: 500px"></table>
                 </div>
+                <div id="ships-to-add"></div>
             </div>
             <div class="col-12 col-sm-12 col-md-6 pt-2">
                 <h3 class="titleTxt-color">Salvos</h3>
                 <div class="table-responsive mt-2">
                     <table id="salvo-grid" class="table table-bordered table-style padding-cell" style="height: 500px"></table>
                 </div>
+                <div id="salvos-to-add"></div>
             </div>
         </div>
-        <div id="ships-to-add"></div>
     </div>
 </div>
 

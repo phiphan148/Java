@@ -104,7 +104,7 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
             salvoRepository.save(salvo1);
             gamePlayerRepository.save(gamePlayer1);
 
-            Salvo salvo2 = new Salvo(3, turnLocation3);
+            Salvo salvo2 = new Salvo(2, turnLocation3);
             gamePlayer1.addSalvo(salvo2);
             salvoRepository.save(salvo2);
             gamePlayerRepository.save(gamePlayer1);
@@ -114,17 +114,17 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
             salvoRepository.save(salvo3);
             gamePlayerRepository.save(gamePlayer3);
 
-            Salvo salvo4 = new Salvo(8, turnLocation3);
+            Salvo salvo4 = new Salvo(2, turnLocation3);
             gamePlayer2.addSalvo(salvo4);
             salvoRepository.save(salvo4);
             gamePlayerRepository.save(gamePlayer2);
 
-            Salvo salvo5 = new Salvo(6, turnLocation2);
+            Salvo salvo5 = new Salvo(2, turnLocation2);
             gamePlayer3.addSalvo(salvo5);
             salvoRepository.save(salvo5);
             gamePlayerRepository.save(gamePlayer3);
 
-            Salvo salvo6 = new Salvo(10, turnLocation1);
+            Salvo salvo6 = new Salvo(2, turnLocation1);
             gamePlayer4.addSalvo(salvo6);
             salvoRepository.save(salvo6);
             gamePlayerRepository.save(gamePlayer4);

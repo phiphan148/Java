@@ -1,3 +1,4 @@
+var mainPlayerShips = [];
 function mainGame() {
     // var obj = {};
     // var reg = /(?:[?&]([^?&#=]+)(?:=([^&#]*))?)(?:#.*)?/g;
@@ -11,15 +12,28 @@ function mainGame() {
         .then(response => response.json())
         .then((data) => {
             let gamePlayerData = data;
-            let mainPlayerShips = gamePlayerData.mainPlayerShips;
+            mainPlayerShips = gamePlayerData.mainPlayerShips;
             let mainPlayerSalvos = gamePlayerData.mainPlayerSalvos;
             let opponentSalvos = gamePlayerData.opponentSalvos;
             let opponentShipGetHit = gamePlayerData.opponentShipGetHit;
+            let mainPlayerShipType = mainPlayerShips.map(ship => ship.shipType);
+            console.log(mainPlayerShipType);
+            console.log(mainPlayerShips);
+
+            let radioCheckList = document.getElementsByName("ship");
+            radioCheckList.forEach(check => {
+                if (mainPlayerShipType.includes(check.getAttribute("data-shiptype"))) {
+                    check.setAttribute("disabled", "true");
+                } else if (mainPlayerShipType.length >= 5) {
+                    check.setAttribute("disabled", "true");
+                }
+            });
 
             if (gamePlayerData.mainPlayer == null) {
                 window.location.href = "../web/games.html";
             } else {
                 document.getElementById('ships-to-add').innerHTML = `<button onclick="createShip(${gpId})">Add ship</button>`;
+                document.getElementById('salvos-to-add').innerHTML = `<button onclick="addSalvo(${gpId})">Add salvo</button>`;
 
                 gridCreate("ship-grid");
                 gridCreate("salvo-grid");
@@ -70,16 +84,16 @@ function gridCreate(tableId) {
     for (let j = 1; j < firstrow.length; j++) {
         tbodycontent += `<tr>
                                 <th class=${firstcol[j]}0>${firstcol[j]}</th>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}1" class=${firstcol[j]}1></td>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}2" class=${firstcol[j]}2></td>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}3" class=${firstcol[j]}3></td>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}4" class=${firstcol[j]}4></td>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}5" class=${firstcol[j]}5></td>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}6" class=${firstcol[j]}6></td>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}7" class=${firstcol[j]}7></td>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}8" class=${firstcol[j]}8></td>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}9" class=${firstcol[j]}9></td>
-                                <td tabindex="1" onclick="chooseLocation(this)" data-classname="${firstcol[j]}10" class=${firstcol[j]}10></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}1" class=${firstcol[j]}1></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}2" class=${firstcol[j]}2></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}3" class=${firstcol[j]}3></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}4" class=${firstcol[j]}4></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}5" class=${firstcol[j]}5></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}6" class=${firstcol[j]}6></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}7" class=${firstcol[j]}7></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}8" class=${firstcol[j]}8></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}9" class=${firstcol[j]}9></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}10" class=${firstcol[j]}10></td>
                             </tr>`
     }
     table.appendChild(tbody).innerHTML = tbodycontent;
@@ -91,7 +105,7 @@ function displayGridShip(ships, opponentSalvos) {
     console.log(shipLocation);
     if (shipLocation.length > 0) {
         for (let i = 0; i < shipLocation.length; i++) {
-            document.getElementById("ship-grid").querySelector(`.${shipLocation[i]}`).style.background = "blue";
+            document.getElementById("ship-grid").querySelector(`.${shipLocation[i]}`).style.backgroundColor = "blue";
         }
 
     }
@@ -100,8 +114,11 @@ function displayGridShip(ships, opponentSalvos) {
         for (let i = 0; i < opponentSalvos.length; i++) {
             let shots = opponentSalvos[i].turn;
             for (let j = 0; j < opponentSalvos[i].location.length; j++) {
+                document.getElementById("ship-grid").querySelector(`.${opponentSalvos[i].location[j]}`).style.backgroundColor = "green";
+                document.getElementById("ship-grid").querySelector(`.${opponentSalvos[i].location[j]}`).innerHTML = shots;
                 if (shipLocation.includes(opponentSalvos[i].location[j])) {
-                    document.getElementById("ship-grid").querySelector(`.${opponentSalvos[i].location[j]}`).style.background = "red";
+                    document.getElementById("ship-grid").querySelector(`.${opponentSalvos[i].location[j]}`).style.backgroundColor = "blue";
+                    document.getElementById("ship-grid").querySelector(`.${opponentSalvos[i].location[j]}`).style.backgroundImage = "linear-gradient(to bottom right,  transparent calc(50% - 1px), white, transparent calc(50% + 1px))";
                     document.getElementById("ship-grid").querySelector(`.${opponentSalvos[i].location[j]}`).innerHTML = shots;
                 }
             }
@@ -117,7 +134,8 @@ function displaySalvoGrid(salvos, opponentShipGetHit) {
                 document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.background = "green";
                 document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).innerHTML = shots;
                 if (opponentShipGetHit.includes(salvos[i].location[j])) {
-                    document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.background = "red";
+                    document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.backgroundImage = "linear-gradient(to bottom right,  transparent calc(50% - 1px), white, transparent calc(50% + 1px))";
+                    // document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.background = "red";
                 }
             }
         }
@@ -155,6 +173,7 @@ function getShipType() {
     let radioCheckList = document.getElementsByName("ship");
     shipChooseType = "";
     shipLength = 0;
+
     radioCheckList.forEach(check => {
         if (check.checked == true) {
             shipChooseType = check.getAttribute("data-shiptype");
@@ -176,20 +195,33 @@ function getDirection() {
 }
 
 var shipBow = "";
+var salvoLocation = [];
+
 function chooseLocation(className) {
     shipBow = "";
-    if(className.style.background != "blue"){
+    if (document.getElementById("ship-grid").contains(className) && className.style.backgroundColor != "blue") {
         shipBow = className.getAttribute("data-classname");
         console.log(className);
         console.log(shipBow);
     }
+
+    if (document.getElementById("salvo-grid").contains(className) && className.style.backgroundColor != "green" && className.style.backgroundColor != "orange" && salvoLocation.length < mainPlayerShips.length) {
+        className.style.backgroundColor = "orange";
+        salvoLocation.push(className.getAttribute("data-classname"));
+        console.log(salvoLocation);
+    } else if(className.style.backgroundColor == "orange"){
+        className.style.backgroundColor = "white";
+        salvoLocation = salvoLocation.filter(lo=> lo != className.getAttribute("data-classname"));
+        console.log(salvoLocation)
+    }
+
 }
 
 function createShip(gamePlayerId) {
     if (shipChooseType != "" && shipDirecttion != "" && shipBow != "") {
         let location = [];
         if (shipDirecttion == 'horizontal') {
-            let num = parseInt(shipBow.charAt(1));
+            let num = parseInt(shipBow.slice(1, 3));
             console.log(num);
             console.log(shipLength);
             if (num + shipLength > 11) {
@@ -228,6 +260,23 @@ function createShip(gamePlayerId) {
         alert('Please make sure you choose ship type, direction and location');
     }
 
+
+}
+
+function addSalvo(gamePlayerId) {
+    if (salvoLocation.length != 0) {
+        let data = {turnLocation: salvoLocation};
+        $.post({
+            url: `/api/games/players/${gamePlayerId}/salvos`,
+            data: JSON.stringify(data),
+            dataType: "text",
+            contentType: "application/json"
+        })
+            .done(jqXHR => window.location.href = `../web/game.html?gp=${gamePlayerId}`)
+            .fail((jqXHR, status) => alert(status + " " + jqXHR.responseText))
+    } else {
+        alert('Please make sure you choose salvo location');
+    }
 
 }
 
