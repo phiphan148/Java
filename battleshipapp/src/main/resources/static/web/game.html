@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
           integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <link rel="stylesheet" href="/web/styles/styles.css">
-    
+
     <title>Game view</title>
 </head>
 <body onload="checkLoginForGame()">
@@ -21,71 +21,104 @@
         <div id="welcome">
             <p class="text-warning font-weight-bold">Hi <span id="playerLoginName"></span>!</p>
             <form action="/games.html" id="logout-form" onsubmit="return false">
-                <span class="titleTxt-color"><i onclick="logout()" class="fas fa-power-off" style="cursor: pointer; margin-right: 3px"></i>Log out here</span>
+                <span class="titleTxt-color"><i onclick="logout()" class="fas fa-power-off"
+                                                style="cursor: pointer; margin-right: 3px"></i>Log out here</span>
             </form>
         </div>
         <h1 class="titleTxt-color pt-3">Game View</h1>
-        <p class="titleTxt-color"><span class="font-weight-bold text-warning">Created game:</span> <span id="created"></span></p>
+        <p class="titleTxt-color"><span class="font-weight-bold text-warning">Created game:</span> <span
+                id="created"></span></p>
         <div class="row titleTxt-color">
-            <p class="col-6"><span class="font-weight-bold text-warning">Main player:</span> <span id="main-player"></span></p>
-            <p class="col-6"><span class="font-weight-bold text-warning">Opponent:</span> <span id="opponent"></span></p>
+            <p class="col-12 col-sm-6"><span class="font-weight-bold text-warning">Main player:</span> <span
+                    id="main-player"></span></p>
+            <p class="col-12 col-sm-6"><span class="font-weight-bold text-warning">Opponent:</span> <span
+                    id="opponent"></span>
+            </p>
         </div>
-        <div class="table-responsive mt-2">
-            <table class="table table-bordered table-style">
+        <div class="table-responsive mt-3">
+            <table id="turn-history" class="table table-bordered table-style" align="center">
+                <thead>
                 <tr>
-                    <th></th>
-                    <th>Number of ship</th>
-                    <th>Type</th>
-                    <th>Length</th>
+                    <th style="width: 10%;" rowspan="2">Turn</th>
+                    <th colspan="2">Main Player Ships</th>
+                    <th colspan="2">Opponent Ships</th>
                 </tr>
                 <tr>
-                    <td><input type="radio" onclick="getShipType()" name="ship" id="carrier" data-shiptype="Aircraft Carrier" data-shiplength="5"></td>
-                    <td>1</td>
-                    <td>Aircraft Carrier</td>
-                    <td>5</td>
+                    <th>Hits</th>
+                    <th style="width: 10%;">Left</th>
+                    <th>Hits</th>
+                    <th style="width: 10%;">Left</th>
                 </tr>
-                <tr>
-                    <td><input type="radio" onclick="getShipType()" name="ship" id="battleship" data-shiptype="Battleship" data-shiplength="4"></td>
-                    <td>1</td>
-                    <td>Battleship</td>
-                    <td>4</td>
-                </tr>
-                <tr>
-                    <td><input type="radio" onclick="getShipType()" name="ship" id="submarine" data-shiptype="Submarine" data-shiplength="3"></td>
-                    <td>1</td>
-                    <td>Submarine</td>
-                    <td>3</td>
-                </tr>
-                <tr>
-                    <td><input type="radio" onclick="getShipType()" name="ship" id="destroyer" data-shiptype="Destroyer" data-shiplength="3"></td>
-                    <td>1</td>
-                    <td>Destroyer</td>
-                    <td>3</td>
-                </tr>
-                <tr>
-                    <td><input type="radio" onclick="getShipType()" name="ship" id="patrol" data-shiptype="Patrol Boat" data-shiplength="2"></td>
-                    <td>1</td>
-                    <td>Patrol Boat</td>
-                    <td>2</td>
-                </tr>
+                </thead>
             </table>
         </div>
-        <div class="row mt-2 mb-2">
-            <label class="titleTxt-color">Place ship in horizontal</label><input onclick="getDirection()" name="direction" data-direction="horizontal" type="radio" class="col"/>
-            <label class="titleTxt-color">Place ship in vertical</label><input onclick="getDirection()" name="direction" data-direction="vertical" type="radio" class="col"/>
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-6">
+                <div class="table-responsive mt-2">
+                    <table class="table table-bordered table-style">
+                        <tr>
+                            <th></th>
+                            <th>Number of ship</th>
+                            <th>Type</th>
+                            <th>Length</th>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" onclick="getShipType()" name="ship" id="carrier"
+                                       data-shiptype="Aircraft Carrier" data-shiplength="5"></td>
+                            <td>1</td>
+                            <td>Aircraft Carrier</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" onclick="getShipType()" name="ship" id="battleship"
+                                       data-shiptype="Battleship" data-shiplength="4"></td>
+                            <td>1</td>
+                            <td>Battleship</td>
+                            <td>4</td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" onclick="getShipType()" name="ship" id="submarine"
+                                       data-shiptype="Submarine" data-shiplength="3"></td>
+                            <td>1</td>
+                            <td>Submarine</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" onclick="getShipType()" name="ship" id="destroyer"
+                                       data-shiptype="Destroyer" data-shiplength="3"></td>
+                            <td>1</td>
+                            <td>Destroyer</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" onclick="getShipType()" name="ship" id="patrol"
+                                       data-shiptype="Patrol Boat" data-shiplength="2"></td>
+                            <td>1</td>
+                            <td>Patrol Boat</td>
+                            <td>2</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row col-12 col-sm-12 col-md-6">
+                <span class="col-6 row titleTxt-color" style="align-items: center; justify-content: center"><input onclick="getDirection()" name="direction" data-direction="horizontal" type="radio" class="col-2 col-lg-1"/>Horizontal</span>
+                <span class="col-6 row titleTxt-color" style="align-items: center; justify-content: center"><input onclick="getDirection()" name="direction" data-direction="vertical" type="radio" class="col-2 col-lg-1"/>Vertical</span>
+            </div>
         </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-md-6 pt-2">
                 <h3 class="titleTxt-color">Ships</h3>
                 <div class="table-responsive mt-2">
-                    <table id="ship-grid" class="table table-bordered table-style padding-cell" style="height: 500px"></table>
+                    <table id="ship-grid" class="table table-bordered table-style padding-cell"
+                           style="height: 500px"></table>
                 </div>
                 <div id="ships-to-add"></div>
             </div>
             <div class="col-12 col-sm-12 col-md-6 pt-2">
                 <h3 class="titleTxt-color">Salvos</h3>
                 <div class="table-responsive mt-2">
-                    <table id="salvo-grid" class="table table-bordered table-style padding-cell" style="height: 500px"></table>
+                    <table id="salvo-grid" class="table table-bordered table-style padding-cell"
+                           style="height: 500px"></table>
                 </div>
                 <div id="salvos-to-add"></div>
             </div>

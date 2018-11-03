@@ -59,13 +59,13 @@ public class SalvoController {
     public Map<String, Object> findGamePlayer(@PathVariable Long nn, Authentication authentication) {
         Map<String, Object> gamePlayer = new LinkedHashMap<>();
         if (!checkLogin(authentication)) {
-            ResponseEntity<Object> refuse = new ResponseEntity<>(makeResponseEntityMap("message","Please log in to see this content"), HttpStatus.UNAUTHORIZED);
+            ResponseEntity<Object> refuse = new ResponseEntity<>(makeResponseEntityMap("message", "Please log in to see this content"), HttpStatus.UNAUTHORIZED);
             gamePlayer.put("Refuse", refuse.getBody() + " Status:" + refuse.getStatusCodeValue());
         } else {
             List<Long> currentUserGpIds = getCurrentUser(authentication).gamePlayers.stream().map(gp -> gp.getId()).collect(toList());
             gamePlayer.put("CurrentUserGPIds", currentUserGpIds);
             if (!currentUserGpIds.contains(nn)) {
-                ResponseEntity<Object> refuse = new ResponseEntity<>(makeResponseEntityMap("message","You have no authorise to see this content"), HttpStatus.UNAUTHORIZED);
+                ResponseEntity<Object> refuse = new ResponseEntity<>(makeResponseEntityMap("message", "You have no authorise to see this content"), HttpStatus.UNAUTHORIZED);
                 gamePlayer.put("Refuse", refuse.getBody() + " Status:" + refuse.getStatusCodeValue());
             } else {
                 GamePlayer gamePlayerById = gamePlayerRepo.findById(nn).get();
@@ -95,6 +95,80 @@ public class SalvoController {
                     }
                 }
 
+                List<Ship> opponentShipsForEachTurn = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getShips().stream().collect(toList());
+                List<Ship> mainPlayerShipsForEachTurn = gamePlayerById.getShips().stream().collect(toList());
+                List<Salvo> mainPlayerSalvos = gamePlayerById.salvos.stream().collect(toList());
+                List<Salvo> opponentSalvos = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).salvos.stream().collect(toList());
+                List<Ship> opponentShipSunk = new ArrayList<>();
+                List<Ship> mainPlayerShipSunk = new ArrayList<>();
+                List<Map<String, Object>> finalReturn = new ArrayList<>();
+
+                int opponentShipsForEachTurnSize = opponentShipsForEachTurn.size();
+                int mainPlayerShipsForEachTurnSize = mainPlayerShipsForEachTurn.size();
+
+
+
+                //TURN HISTORY RETURN
+                for (int i = 0; i < mainPlayerSalvos.size(); i++) {
+                    int turn = 0;
+                    turn = mainPlayerSalvos.get(i).getTurn();
+                    boolean checkOpponent = false;
+                    boolean checkMainPlayer = false;
+                    Map<String, Object> historyTurn;
+                    Map<String, Object> opponentShipMap;
+                    Map<String, Object> mainPlayerShipMap;
+                    int opponentShipsLeft = 0;
+                    int mainPlayerShipsLeft = 0;
+                    List<Map<String, Object>> turnHistoryMapListOpponent = new ArrayList<>();
+                    List<Map<String, Object>> turnHistoryMapListMainPlayer = new ArrayList<>();
+
+                    //GET OPPONENTSHIPGETHIT AND LEFT
+                    for (int j = 0; j < mainPlayerSalvos.get(i).getTurnLocation().size(); j++) {
+                        for (int k = 0; k < opponentShipsForEachTurn.size(); k++) {
+                            if (opponentShipsForEachTurn.get(k).getLocation().contains(mainPlayerSalvos.get(i).getTurnLocation().get(j))) {
+                                String getHitLo = mainPlayerSalvos.get(i).getTurnLocation().get(j);
+                                List<String> newShipLocation = opponentShipsForEachTurn.get(k).getLocation().stream().filter(lo -> !lo.equals(getHitLo)).collect(toList());
+                                if (newShipLocation.size() == 0) {
+                                    checkOpponent = true;
+                                    opponentShipSunk.add(opponentShipsForEachTurn.get(k));
+                                    opponentShipsLeft = opponentShipsForEachTurn.size() - opponentShipSunk.size();
+                                    opponentShipsForEachTurnSize = opponentShipsForEachTurn.size() - opponentShipSunk.size();
+                                } else {
+                                    checkOpponent = false;
+                                    opponentShipsLeft = opponentShipsForEachTurnSize;
+                                }
+                                String shipType = opponentShipsForEachTurn.get(k).getShipType();
+                                if(turnHistoryMapListOpponent.stream().filter(s->s.containsValue(shipType)).collect(toList()).size() >0){
+                                    for(int z=0; z<turnHistoryMapListOpponent.size(); z++){
+                                        if(turnHistoryMapListOpponent.get(z).containsValue(shipType)){
+                                            int val = (Integer) turnHistoryMapListOpponent.get(z).get("hitNumber");
+                                            turnHistoryMapListOpponent.get(z).replace("hitNumber", val + opponentShipsForEachTurn.get(k).getLocation().size() - newShipLocation.size());
+                                            turnHistoryMapListOpponent.get(z).replace("sunk", checkOpponent);
+                                        }
+                                    }
+                                } else {
+                                    opponentShipMap = makeShipsGetHitMap(opponentShipsForEachTurn.get(k).getShipType(), opponentShipsForEachTurn.get(k).getLocation().size() - newShipLocation.size(), checkOpponent);
+                                    turnHistoryMapListOpponent.add(opponentShipMap);
+                                }
+                                opponentShipsForEachTurn.get(k).setLocations(newShipLocation);
+                            }
+                        }
+                    }
+
+
+                    //GET MAINPLAYERSHIPGETHIT AND LEFT
+                    
+
+
+
+                    //FINALL ADD
+                    historyTurn = makeTurnHistoryMap(turn, turnHistoryMapListOpponent, turnHistoryMapListMainPlayer, opponentShipsLeft, mainPlayerShipsLeft);
+                    finalReturn.add(historyTurn);
+                }
+
+
+                gamePlayer.put("opponentShipLocations", shipsList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getShips()));
+                gamePlayer.put("finalReturn", finalReturn);
                 gamePlayer.put("game", makeGameMap(gamePlayerById.getGame()));
                 gamePlayer.put("mainPlayer", makePlayerMap(gamePlayerById.getPlayer()));
                 gamePlayer.put("opponent", playerList(opponents));
@@ -102,6 +176,7 @@ public class SalvoController {
                 gamePlayer.put("mainPlayerSalvos", salvoList(gamePlayerById.getSalvos()));
                 gamePlayer.put("opponentShipGetHit", opponentShipGetHit);
                 gamePlayer.put("opponentSalvos", salvoList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getSalvos()));
+
 
             }
         }
@@ -138,7 +213,7 @@ public class SalvoController {
     @RequestMapping(value = "/games", method = RequestMethod.POST)
     public ResponseEntity<Object> addGame(Authentication authentication) {
         if (!checkLogin(authentication)) {
-            return new ResponseEntity<>(makeResponseEntityMap("message","Please log in to add new game"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(makeResponseEntityMap("message", "Please log in to add new game"), HttpStatus.UNAUTHORIZED);
         }
 
         //1st WAY
@@ -162,7 +237,7 @@ public class SalvoController {
 //        return ResponseEntity.ok()
 //                .header("Custom-Header", "foo")
 //                .body("Custom header set");
-        return new ResponseEntity<>(makeResponseEntityMap("gamePlayerId", gamePlayerThisGame.getId()),HttpStatus.CREATED);
+        return new ResponseEntity<>(makeResponseEntityMap("gamePlayerId", gamePlayerThisGame.getId()), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/game/{gameId}/players", method = RequestMethod.POST)
@@ -172,23 +247,23 @@ public class SalvoController {
         }
 
         List<Long> GameIds = gameRepo.findAll().stream().map(game -> game.getId()).collect(toList());
-        if(!GameIds.contains(gameId)){
+        if (!GameIds.contains(gameId)) {
             return new ResponseEntity<>(makeResponseEntityMap("message", "There is no game you have chosen"), HttpStatus.FORBIDDEN);
         }
 
         Game gameGetChosen = gameRepo.getOne(gameId);
-        if(gameGetChosen.getPlayers().size()>=2){
+        if (gameGetChosen.getPlayers().size() >= 2) {
             return new ResponseEntity<>(makeResponseEntityMap("message", "The game you have chosen is full"), HttpStatus.FORBIDDEN);
         }
 
-        if(gameGetChosen.getPlayers().contains(getCurrentUser(authentication))){
+        if (gameGetChosen.getPlayers().contains(getCurrentUser(authentication))) {
             return new ResponseEntity<>(makeResponseEntityMap("message", "You are already join this game"), HttpStatus.FORBIDDEN);
         }
 
         GamePlayer newGamePlayer = new GamePlayer(gameGetChosen, getCurrentUser(authentication));
         gamePlayerRepo.save(newGamePlayer);
 
-        return new ResponseEntity<>(makeResponseEntityMap("gamePlayerId", newGamePlayer.getId()),HttpStatus.CREATED);
+        return new ResponseEntity<>(makeResponseEntityMap("gamePlayerId", newGamePlayer.getId()), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/games/players/{gamePlayerId}/ships", method = RequestMethod.POST)
@@ -198,38 +273,38 @@ public class SalvoController {
         }
 
         List<Long> gamePlayerIds = gamePlayerRepo.findAll().stream().map(gp -> gp.getId()).collect(toList());
-        if(!gamePlayerIds.contains(gamePlayerId)){
+        if (!gamePlayerIds.contains(gamePlayerId)) {
             return new ResponseEntity<>(makeResponseEntityMap("message", "There is no game player with the given ID"), HttpStatus.UNAUTHORIZED);
         }
 
         GamePlayer gamePlayerById = gamePlayerRepo.findById(gamePlayerId).get();
         Player playerByGpId = gamePlayerById.getPlayer();
-        if(playerByGpId.getId() != getCurrentUser(authentication).getId()){
+        if (playerByGpId.getId() != getCurrentUser(authentication).getId()) {
             return new ResponseEntity<>(makeResponseEntityMap("message", "You are not authorise to create new ships"), HttpStatus.UNAUTHORIZED);
         }
 
-        if(gamePlayerById.ships.size()>5){
+        if (gamePlayerById.ships.size() > 5) {
             return new ResponseEntity<>(makeResponseEntityMap("message", "You cannot create more than 4 ships"), HttpStatus.FORBIDDEN);
         }
 
 
         ship.setGamePlayer(gamePlayerById);
-        List<List<String>> shipLocation = gamePlayerById.ships.stream().map(shipinlist->shipinlist.getLocation()).collect(toList());
+        List<List<String>> shipLocation = gamePlayerById.ships.stream().map(shipinlist -> shipinlist.getLocation()).collect(toList());
         List<String> mainPlayerShipLocation = shipLocation.stream()
-                .flatMap(location->location.stream()).collect(toList());
+                .flatMap(location -> location.stream()).collect(toList());
 
-        if(gamePlayerById.ships.stream().map(shipinList->shipinList.getShipType()).collect(toList()).contains(ship.getShipType())){
+        if (gamePlayerById.ships.stream().map(shipinList -> shipinList.getShipType()).collect(toList()).contains(ship.getShipType())) {
             return new ResponseEntity<>(makeResponseEntityMap("message", "Ship already was added before"), HttpStatus.FORBIDDEN);
         }
 
         List<String> overlapShip = new ArrayList<>();
-        for(int i=0; i<ship.getLocation().size(); i++){
-            if(mainPlayerShipLocation.contains(ship.getLocation().get(i))){
+        for (int i = 0; i < ship.getLocation().size(); i++) {
+            if (mainPlayerShipLocation.contains(ship.getLocation().get(i))) {
                 overlapShip.add(ship.getLocation().get(i));
             }
         }
 
-        if(overlapShip.size()>0){
+        if (overlapShip.size() > 0) {
             return new ResponseEntity<>(makeResponseEntityMap("Overlapships", overlapShip), HttpStatus.FORBIDDEN);
         } else {
             shipRepo.save(ship);
@@ -245,36 +320,36 @@ public class SalvoController {
         }
 
         List<Long> gamePlayerIds = gamePlayerRepo.findAll().stream().map(gp -> gp.getId()).collect(toList());
-        if(!gamePlayerIds.contains(gamePlayerId)){
+        if (!gamePlayerIds.contains(gamePlayerId)) {
             return new ResponseEntity<>(makeResponseEntityMap("message", "There is no game player with the given ID"), HttpStatus.UNAUTHORIZED);
         }
 
         GamePlayer gamePlayerById = gamePlayerRepo.findById(gamePlayerId).get();
         Player playerByGpId = gamePlayerById.getPlayer();
-        if(playerByGpId.getId() != getCurrentUser(authentication).getId()){
+        if (playerByGpId.getId() != getCurrentUser(authentication).getId()) {
             return new ResponseEntity<>(makeResponseEntityMap("message", "You are not authorise to create new ships"), HttpStatus.UNAUTHORIZED);
         }
 
         salvo.setGamePlayer(gamePlayerById);
         salvo.setTurn(3);
 
-        List<List<String>> salvoLocation = gamePlayerById.salvos.stream().map(salvoL->salvoL.getTurnLocation()).collect(toList());
+        List<List<String>> salvoLocation = gamePlayerById.salvos.stream().map(salvoL -> salvoL.getTurnLocation()).collect(toList());
         List<String> mainPlayerSalvoLocation = salvoLocation.stream()
-                .flatMap(location->location.stream()).collect(toList());
+                .flatMap(location -> location.stream()).collect(toList());
 
         List<String> overlapSalvo = new ArrayList<>();
-        for(int i=0; i<salvo.getTurnLocation().size(); i++){
-            if(mainPlayerSalvoLocation.contains(salvo.getTurnLocation().get(i))){
+        for (int i = 0; i < salvo.getTurnLocation().size(); i++) {
+            if (mainPlayerSalvoLocation.contains(salvo.getTurnLocation().get(i))) {
                 overlapSalvo.add(salvo.getTurnLocation().get(i));
             }
         }
 
-        List<Integer> salvoTurn = gamePlayerById.salvos.stream().map(salvoL->salvoL.getTurn()).collect(toList());
-        if(salvoTurn.contains(salvo.getTurn())){
+        List<Integer> salvoTurn = gamePlayerById.salvos.stream().map(salvoL -> salvoL.getTurn()).collect(toList());
+        if (salvoTurn.contains(salvo.getTurn())) {
             return new ResponseEntity<>(makeResponseEntityMap("Cannot use this turn", salvo.getTurn()), HttpStatus.FORBIDDEN);
         }
 
-        if(overlapSalvo.size()>0){
+        if (overlapSalvo.size() > 0) {
             return new ResponseEntity<>(makeResponseEntityMap("OverlapSalvo", overlapSalvo), HttpStatus.FORBIDDEN);
         } else {
             salvoRepo.save(salvo);
@@ -392,9 +467,27 @@ public class SalvoController {
     }
 
     private Map<String, Object> makeResponseEntityMap(String key, Object value) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         map.put(key, value);
         return map;
+    }
+
+    private Map<String, Object> makeTurnHistoryMap(int turn, List<Map<String, Object>> opponentShipGetHitList, List<Map<String, Object>> mainPlayerShipGetHitList, int opponentShipsLeft, int mainPlayerShipsLeft) {
+        Map<String, Object> turnHistoryMap = new LinkedHashMap<>();
+        turnHistoryMap.put("turn", turn);
+        turnHistoryMap.put("mainPlayerShipGetHitList", mainPlayerShipGetHitList);
+        turnHistoryMap.put("mainPlayerShipsLeft", mainPlayerShipsLeft);
+        turnHistoryMap.put("opponentShipGetHitList", opponentShipGetHitList);
+        turnHistoryMap.put("opponentShipsLeft", opponentShipsLeft);
+        return turnHistoryMap;
+    }
+
+    private Map<String, Object> makeShipsGetHitMap(String shipType, int hitNumber, boolean sunk) {
+        Map<String, Object> shipsGetHitMap = new LinkedHashMap<>();
+        shipsGetHitMap.put("shipType", shipType);
+        shipsGetHitMap.put("hitNumber", hitNumber);
+        shipsGetHitMap.put("sunk", sunk);
+        return shipsGetHitMap;
     }
 
 }
