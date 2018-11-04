@@ -3,9 +3,10 @@ package com.phi.battleshipapp.persistence.model;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
 
 @Entity
-public class Salvo {
+public class Salvo{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -26,6 +27,7 @@ public class Salvo {
         this.turn = turn;
         this.turnLocation = turnLocation;
     }
+
 
     @Override
     public String toString() {
@@ -63,4 +65,13 @@ public class Salvo {
     public void setTurn(int turn) {
         this.turn = turn;
     }
+
+    public static Comparator<Salvo> salvoByTurn = (s1, s2) -> {
+
+        int turn1 = s1.getTurn();
+        int turn2 = s2.getTurn();
+        return turn1-turn2;
+
+    };
+
 }

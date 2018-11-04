@@ -88,7 +88,6 @@ public class SalvoController {
                         .collect(Collectors.toList());
 
                 List<String> opponentShipGetHit = new ArrayList<>();
-
                 for (int j = 0; j < mainPlayerSalvoLocation.size(); j++) {
                     if (opponentShip.contains(mainPlayerSalvoLocation.get(j))) {
                         opponentShipGetHit.add(mainPlayerSalvoLocation.get(j));
@@ -98,77 +97,50 @@ public class SalvoController {
                 List<Ship> opponentShipsForEachTurn = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getShips().stream().collect(toList());
                 List<Ship> mainPlayerShipsForEachTurn = gamePlayerById.getShips().stream().collect(toList());
                 List<Salvo> mainPlayerSalvos = gamePlayerById.salvos.stream().collect(toList());
+                //SORT SALVO BY TURN
+                Collections.sort(mainPlayerSalvos, Salvo.salvoByTurn);
                 List<Salvo> opponentSalvos = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).salvos.stream().collect(toList());
+                //SORT SALVO BY TURN
+                Collections.sort(opponentSalvos, Salvo.salvoByTurn);
                 List<Ship> opponentShipSunk = new ArrayList<>();
                 List<Ship> mainPlayerShipSunk = new ArrayList<>();
-                List<Map<String, Object>> finalReturn = new ArrayList<>();
-
-                int opponentShipsForEachTurnSize = opponentShipsForEachTurn.size();
-                int mainPlayerShipsForEachTurnSize = mainPlayerShipsForEachTurn.size();
-
-
+                List<Map<String, Object>> turnHistory = new ArrayList<>();
+                List<String> opponentShipLocationGetHitList = new ArrayList<>();
+                List<String> mainPlayerShipLocationGetHitList = new ArrayList<>();
 
                 //TURN HISTORY RETURN
                 for (int i = 0; i < mainPlayerSalvos.size(); i++) {
                     int turn = 0;
                     turn = mainPlayerSalvos.get(i).getTurn();
-                    boolean checkOpponent = false;
-                    boolean checkMainPlayer = false;
                     Map<String, Object> historyTurn;
-                    Map<String, Object> opponentShipMap;
-                    Map<String, Object> mainPlayerShipMap;
-                    int opponentShipsLeft = 0;
-                    int mainPlayerShipsLeft = 0;
                     List<Map<String, Object>> turnHistoryMapListOpponent = new ArrayList<>();
                     List<Map<String, Object>> turnHistoryMapListMainPlayer = new ArrayList<>();
 
-                    //GET OPPONENTSHIPGETHIT AND LEFT
-                    for (int j = 0; j < mainPlayerSalvos.get(i).getTurnLocation().size(); j++) {
-                        for (int k = 0; k < opponentShipsForEachTurn.size(); k++) {
-                            if (opponentShipsForEachTurn.get(k).getLocation().contains(mainPlayerSalvos.get(i).getTurnLocation().get(j))) {
-                                String getHitLo = mainPlayerSalvos.get(i).getTurnLocation().get(j);
-                                List<String> newShipLocation = opponentShipsForEachTurn.get(k).getLocation().stream().filter(lo -> !lo.equals(getHitLo)).collect(toList());
-                                if (newShipLocation.size() == 0) {
-                                    checkOpponent = true;
-                                    opponentShipSunk.add(opponentShipsForEachTurn.get(k));
-                                    opponentShipsLeft = opponentShipsForEachTurn.size() - opponentShipSunk.size();
-                                    opponentShipsForEachTurnSize = opponentShipsForEachTurn.size() - opponentShipSunk.size();
-                                } else {
-                                    checkOpponent = false;
-                                    opponentShipsLeft = opponentShipsForEachTurnSize;
-                                }
-                                String shipType = opponentShipsForEachTurn.get(k).getShipType();
-                                if(turnHistoryMapListOpponent.stream().filter(s->s.containsValue(shipType)).collect(toList()).size() >0){
-                                    for(int z=0; z<turnHistoryMapListOpponent.size(); z++){
-                                        if(turnHistoryMapListOpponent.get(z).containsValue(shipType)){
-                                            int val = (Integer) turnHistoryMapListOpponent.get(z).get("hitNumber");
-                                            turnHistoryMapListOpponent.get(z).replace("hitNumber", val + opponentShipsForEachTurn.get(k).getLocation().size() - newShipLocation.size());
-                                            turnHistoryMapListOpponent.get(z).replace("sunk", checkOpponent);
-                                        }
-                                    }
-                                } else {
-                                    opponentShipMap = makeShipsGetHitMap(opponentShipsForEachTurn.get(k).getShipType(), opponentShipsForEachTurn.get(k).getLocation().size() - newShipLocation.size(), checkOpponent);
-                                    turnHistoryMapListOpponent.add(opponentShipMap);
-                                }
-                                opponentShipsForEachTurn.get(k).setLocations(newShipLocation);
-                            }
-                        }
+
+                    if (i < opponentSalvos.size()) {
+                        getShipInfo(opponentShipLocationGetHitList, mainPlayerSalvos.get(i), opponentShipsForEachTurn, opponentShipSunk,
+                                turnHistoryMapListOpponent);
+                        getShipInfo(mainPlayerShipLocationGetHitList, opponentSalvos.get(i), mainPlayerShipsForEachTurn, mainPlayerShipSunk,
+                                turnHistoryMapListMainPlayer);
+
                     }
 
 
-                    //GET MAINPLAYERSHIPGETHIT AND LEFT
-                    
+                    if (i >= opponentSalvos.size()) {
+//                        getShipInfo(mainPlayerShipLocationGetHit, opponentSalvos.get(i-1), mainPlayerShipsForEachTurn, mainPlayerShipSunk,
+//                                turnHistoryMapListMainPlayer);
+                        getShipInfo(opponentShipLocationGetHitList, mainPlayerSalvos.get(i), opponentShipsForEachTurn, opponentShipSunk,
+                                turnHistoryMapListOpponent);
+                    }
+
+                    //FINAL ADD
+                    historyTurn = makeTurnHistoryMap(turn, turnHistoryMapListOpponent, turnHistoryMapListMainPlayer, opponentShipsForEachTurn.size() - opponentShipSunk.size(), mainPlayerShipsForEachTurn.size() - mainPlayerShipSunk.size());
+                    turnHistory.add(historyTurn);
 
 
-
-                    //FINALL ADD
-                    historyTurn = makeTurnHistoryMap(turn, turnHistoryMapListOpponent, turnHistoryMapListMainPlayer, opponentShipsLeft, mainPlayerShipsLeft);
-                    finalReturn.add(historyTurn);
                 }
 
-
-                gamePlayer.put("opponentShipLocations", shipsList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getShips()));
-                gamePlayer.put("finalReturn", finalReturn);
+                gamePlayer.put("turnHistory", turnHistory);
                 gamePlayer.put("game", makeGameMap(gamePlayerById.getGame()));
                 gamePlayer.put("mainPlayer", makePlayerMap(gamePlayerById.getPlayer()));
                 gamePlayer.put("opponent", playerList(opponents));
@@ -488,6 +460,43 @@ public class SalvoController {
         shipsGetHitMap.put("hitNumber", hitNumber);
         shipsGetHitMap.put("sunk", sunk);
         return shipsGetHitMap;
+    }
+
+    private void getShipInfo(List<String> locationGetHitList, Salvo salvo, List<Ship> shipListForEachTurn, List<Ship> shipsSunkList,
+                             List<Map<String, Object>> turnHistoryMapList) {
+        for (int k = 0; k < shipListForEachTurn.size(); k++) {
+            List<String> locationGetHitEachTurn = new ArrayList<>();
+            for (int j = 0; j < salvo.getTurnLocation().size(); j++) {
+                if (shipListForEachTurn.get(k).getLocation().contains(salvo.getTurnLocation().get(j))) {
+                    if (!locationGetHitList.contains(salvo.getTurnLocation().get(j))) {
+                        locationGetHitList.add(salvo.getTurnLocation().get(j));
+                    }
+                    locationGetHitEachTurn.add(salvo.getTurnLocation().get(j));
+                    List<String> shipLocationLeft = shipListForEachTurn.get(k).getLocation().stream().filter(lo -> !locationGetHitList.contains(lo)).collect(toList());
+
+                    boolean checkOpponent;
+                    if (shipLocationLeft.size() == 0) {
+                        checkOpponent = true;
+                        shipsSunkList.add(shipListForEachTurn.get(k));
+                    } else {
+                        checkOpponent = false;
+                    }
+
+                    String shipType = shipListForEachTurn.get(k).getShipType();
+                    if (turnHistoryMapList.stream().filter(s -> s.containsValue(shipType)).collect(toList()).size() > 0) {
+                        for (int z = 0; z < turnHistoryMapList.size(); z++) {
+                            if (turnHistoryMapList.get(z).containsValue(shipType)) {
+                                turnHistoryMapList.get(z).replace("hitNumber", locationGetHitEachTurn.size());
+                                turnHistoryMapList.get(z).replace("sunk", checkOpponent);
+                            }
+                        }
+                    } else {
+                        Map<String, Object> opponentShipMap = makeShipsGetHitMap(shipListForEachTurn.get(k).getShipType(), locationGetHitEachTurn.size(), checkOpponent);
+                        turnHistoryMapList.add(opponentShipMap);
+                    }
+                }
+            }
+        }
     }
 
 }

@@ -35,11 +35,13 @@ function mainGame() {
                 document.getElementById('ships-to-add').innerHTML = `<button class="button-style" onclick="createShip(${gpId})">Add ship</button>`;
                 document.getElementById('salvos-to-add').innerHTML = `<button class="button-style" onclick="addSalvo(${gpId})">Add salvo</button>`;
 
+                displayTurnHistory(gamePlayerData);
                 gridCreate("ship-grid");
                 gridCreate("salvo-grid");
                 displayInfo(gamePlayerData);
                 displayGridShip(mainPlayerShips, opponentSalvos);
                 displaySalvoGrid(mainPlayerSalvos, opponentShipGetHit);
+                // displaySalvoGrid(mainPlayerSalvos);
             }
 
         })
@@ -135,7 +137,6 @@ function displaySalvoGrid(salvos, opponentShipGetHit) {
                 document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).innerHTML = shots;
                 if (opponentShipGetHit.includes(salvos[i].location[j])) {
                     document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.backgroundImage = "linear-gradient(to bottom right,  transparent calc(50% - 1px), white, transparent calc(50% + 1px))";
-                    // document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.background = "red";
                 }
             }
         }
@@ -280,71 +281,9 @@ function addSalvo(gamePlayerId) {
 
 }
 
-function testTurn() {
-    let turnHistory = {
-        "turnHistory":[
-            {
-                "turn": 3,
-                "mainplayershipsgethit":[
-                    {
-                        "shiptype": "Destroyer",
-                        "locationgethitnum": 2,
-                        "sunk": "yes"
-                    },
-                    {
-                        "shiptype": "Battleship",
-                        "locationgethitnum": 1,
-                        "sunk": "no"
-                    }
-                ],
-                "mainplayershipleft": 2,
-                "opponentshipsgethit":[
-                    {
-                        "shiptype": "Submarine",
-                        "locationgethitnum": 3,
-                        "sunk": "yes"
-                    },
-                    {
-                        "shiptype": "Destroyer",
-                        "locationgethitnum": 1,
-                        "sunk": "no"
-                    }
-                ],
-                "opponentshipsleft": 1,
-            },
-            {
-                "turn": 2,
-                "mainplayershipsgethit":[
-                    {
-                        "shiptype": "Destroyer",
-                        "locationgethitnum": 2,
-                        "sunk": "no"
-                    },
-                    {
-                        "shiptype": "Battleship",
-                        "locationgethitnum": 1,
-                        "sunk": "yes"
-                    }
-                ],
-                "mainplayershipleft": 2,
-                "opponentshipsgethit":[
-                    {
-                        "shiptype": "Submarine",
-                        "locationgethitnum": 3,
-                        "sunk": "yes"
-                    },
-                    {
-                        "shiptype": "Destroyer",
-                        "locationgethitnum": 1,
-                        "sunk": "no"
-                    }
-                ],
-                "opponentshipsleft": 1
-            }
-        ]
-    };
-    let turnData = turnHistory.turnHistory;
-    console.log(turnData)
+function displayTurnHistory(data) {
+    let turnData = data.turnHistory;
+    console.log(turnData);
     let table = document.getElementById("turn-history");
     let tBody = document.createElement("tbody");
     let row = '';
@@ -353,23 +292,29 @@ function testTurn() {
         let mainPlayerHits = '';
         let opponentHits = '';
         tem += `<td style="vertical-align: middle">${turnData[i].turn}</td>`
-        for(let j=0; j<turnData[i].mainplayershipsgethit.length; j++){
-            mainPlayerHits += `<p>${turnData[i].mainplayershipsgethit[j].shiptype} (get hit (${turnData[i].mainplayershipsgethit[j].locationgethitnum}), sunk(${turnData[i].mainplayershipsgethit[j].sunk}))</p>`;
+        for(let j=0; j<turnData[i].mainPlayerShipGetHitList.length; j++){
+            mainPlayerHits += `<p>${turnData[i].mainPlayerShipGetHitList[j].shipType} (get hit (${turnData[i].mainPlayerShipGetHitList[j].hitNumber}), sunk(${turnData[i].mainPlayerShipGetHitList[j].sunk}))</p>`;
         }
-        tem += `<td class="text-left">${mainPlayerHits}</td>`;
-        tem += `<td style="vertical-align: middle">${turnData[i].mainplayershipleft}</td>`
-        for(let j=0; j<turnData[i].opponentshipsgethit.length; j++){
-            opponentHits += `<p>${turnData[i].opponentshipsgethit[j].shiptype} (get hit (${turnData[i].opponentshipsgethit[j].locationgethitnum}), sunk(${turnData[i].opponentshipsgethit[j].sunk}))</p>`;
+        if(mainPlayerHits == ''){
+            tem += `<td class="text-left">There is no new ship get hit</td>`;
+        } else {
+            tem += `<td class="text-left">${mainPlayerHits}</td>`;
         }
-        tem += `<td class="text-left">${opponentHits}</td>`
-        tem += `<td style="vertical-align: middle">${turnData[i].opponentshipsleft}</td>`
+        tem += `<td style="vertical-align: middle">${turnData[i].mainPlayerShipsLeft}</td>`
+        for(let j=0; j<turnData[i].opponentShipGetHitList.length; j++){
+            opponentHits += `<p>${turnData[i].opponentShipGetHitList[j].shipType} (get hit (${turnData[i].opponentShipGetHitList[j].hitNumber}), sunk(${turnData[i].opponentShipGetHitList[j].sunk}))</p>`;
+        }
+        if(opponentHits == ''){
+            tem += `<td class="text-left">No opponent new ship get hit</td>`;
+        } else {
+            tem += `<td class="text-left">${opponentHits}</td>`;
+        }
+        tem += `<td style="vertical-align: middle">${turnData[i].opponentShipsLeft}</td>`
         row += `<tr>${tem}</tr>`;
     }
 
     table.appendChild(tBody).innerHTML = row;
 }
-
-testTurn();
 
 //JAVASCRiPT POST ADD SHIPS
 // function createShip(gamePlayerId) {

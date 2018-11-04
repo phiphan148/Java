@@ -98,13 +98,13 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
             List<String> turnLocation3 = Arrays.asList("G5", "C2", "G1");
 
             Salvo salvo1 = new Salvo();
-            salvo1.setTurn(5);
+            salvo1.setTurn(1);
             salvo1.setTurnLocation(turnLocation1);
             gamePlayer4.addSalvo(salvo1);
             salvoRepository.save(salvo1);
             gamePlayerRepository.save(gamePlayer1);
 
-            Salvo salvo2 = new Salvo(2, turnLocation3);
+            Salvo salvo2 = new Salvo(1, turnLocation3);
             gamePlayer1.addSalvo(salvo2);
             salvoRepository.save(salvo2);
             gamePlayerRepository.save(gamePlayer1);
@@ -128,6 +128,7 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
             gamePlayer2.addSalvo(salvo6);
             salvoRepository.save(salvo6);
             gamePlayerRepository.save(gamePlayer4);
+
 
             Date finishDate1 = Date.from(new Date().toInstant().plusSeconds(86400));
 //            Score score1 = new Score(0.5,game1,player1,finishDate1);
