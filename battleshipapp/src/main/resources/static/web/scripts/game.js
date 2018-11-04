@@ -1,11 +1,5 @@
 var mainPlayerShips = [];
 function mainGame() {
-    // var obj = {};
-    // var reg = /(?:[?&]([^?&#=]+)(?:=([^&#]*))?)(?:#.*)?/g;
-    // search.replace(reg, function(match, param, val) {
-    //     obj[decodeURIComponent(param)] = val === undefined ? "" : decodeURIComponent(val);
-    // });
-    // return obj;
     let urlParams = new URLSearchParams(window.location.search);
     let gpId = urlParams.get('gp');
     fetch(`../api/game_view/${gpId}`)
@@ -15,7 +9,6 @@ function mainGame() {
             mainPlayerShips = gamePlayerData.mainPlayerShips;
             let mainPlayerSalvos = gamePlayerData.mainPlayerSalvos;
             let opponentSalvos = gamePlayerData.opponentSalvos;
-            let opponentShipGetHit = gamePlayerData.opponentShipGetHit;
             let mainPlayerShipType = mainPlayerShips.map(ship => ship.shipType);
             console.log(mainPlayerShipType);
             console.log(mainPlayerShips);
@@ -40,8 +33,7 @@ function mainGame() {
                 gridCreate("salvo-grid");
                 displayInfo(gamePlayerData);
                 displayGridShip(mainPlayerShips, opponentSalvos);
-                displaySalvoGrid(mainPlayerSalvos, opponentShipGetHit);
-                // displaySalvoGrid(mainPlayerSalvos);
+                displaySalvoGrid(mainPlayerSalvos);
             }
 
         })
@@ -128,16 +120,13 @@ function displayGridShip(ships, opponentSalvos) {
     }
 }
 
-function displaySalvoGrid(salvos, opponentShipGetHit) {
+function displaySalvoGrid(salvos) {
     if (salvos.length > 0) {
         for (let i = 0; i < salvos.length; i++) {
             let shots = salvos[i].turn;
             for (let j = 0; j < salvos[i].location.length; j++) {
                 document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.background = "green";
                 document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).innerHTML = shots;
-                if (opponentShipGetHit.includes(salvos[i].location[j])) {
-                    document.getElementById("salvo-grid").querySelector(`.${salvos[i].location[j]}`).style.backgroundImage = "linear-gradient(to bottom right,  transparent calc(50% - 1px), white, transparent calc(50% + 1px))";
-                }
             }
         }
     }
@@ -315,17 +304,3 @@ function displayTurnHistory(data) {
 
     table.appendChild(tBody).innerHTML = row;
 }
-
-//JAVASCRiPT POST ADD SHIPS
-// function createShip(gamePlayerId) {
-//     let data = {shipType: "destroyer", location:["A1", "B1", "C1"]};
-//     fetch(`/api/games/players/${gamePlayerId}/ships`, {
-//         method: 'POST',
-//         body: JSON.stringify({data}),
-//         headers: new Headers({
-//             contentType: 'application/json'
-//         })
-//     })
-//         .then(response => console.log("Request complete! response:", response))
-//         .catch(error => alert(error))
-// }

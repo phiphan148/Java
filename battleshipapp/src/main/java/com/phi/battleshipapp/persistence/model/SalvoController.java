@@ -73,27 +73,7 @@ public class SalvoController {
                 Set<GamePlayer> gamePlayerSet = gamePlayerById.getGame().gamePlayers;
                 List<Player> opponents = opponentList(playerList, gamePlayerById.getPlayer());
 
-                List<List<String>> opponentShipList = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).
-                        getShips().stream().map(Ship::getLocation).collect(toList());
-
-                List<List<String>> mainPlayerSalvoLocationList = gamePlayerById.getSalvos()
-                        .stream().map(salvo -> salvo.getTurnLocation()).collect(toList());
-
-                List<String> mainPlayerSalvoLocation = mainPlayerSalvoLocationList.stream()
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toList());
-
-                List<String> opponentShip = opponentShipList.stream()
-                        .flatMap(x -> x.stream())
-                        .collect(Collectors.toList());
-
-                List<String> opponentShipGetHit = new ArrayList<>();
-                for (int j = 0; j < mainPlayerSalvoLocation.size(); j++) {
-                    if (opponentShip.contains(mainPlayerSalvoLocation.get(j))) {
-                        opponentShipGetHit.add(mainPlayerSalvoLocation.get(j));
-                    }
-                }
-
+                //DECLARE FOR TURN HISTORY
                 List<Ship> opponentShipsForEachTurn = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getShips().stream().collect(toList());
                 List<Ship> mainPlayerShipsForEachTurn = gamePlayerById.getShips().stream().collect(toList());
                 List<Salvo> mainPlayerSalvos = gamePlayerById.salvos.stream().collect(toList());
@@ -116,19 +96,14 @@ public class SalvoController {
                     List<Map<String, Object>> turnHistoryMapListOpponent = new ArrayList<>();
                     List<Map<String, Object>> turnHistoryMapListMainPlayer = new ArrayList<>();
 
-
                     if (i < opponentSalvos.size()) {
                         getShipInfo(opponentShipLocationGetHitList, mainPlayerSalvos.get(i), opponentShipsForEachTurn, opponentShipSunk,
                                 turnHistoryMapListOpponent);
                         getShipInfo(mainPlayerShipLocationGetHitList, opponentSalvos.get(i), mainPlayerShipsForEachTurn, mainPlayerShipSunk,
                                 turnHistoryMapListMainPlayer);
-
                     }
 
-
                     if (i >= opponentSalvos.size()) {
-//                        getShipInfo(mainPlayerShipLocationGetHit, opponentSalvos.get(i-1), mainPlayerShipsForEachTurn, mainPlayerShipSunk,
-//                                turnHistoryMapListMainPlayer);
                         getShipInfo(opponentShipLocationGetHitList, mainPlayerSalvos.get(i), opponentShipsForEachTurn, opponentShipSunk,
                                 turnHistoryMapListOpponent);
                     }
@@ -136,8 +111,6 @@ public class SalvoController {
                     //FINAL ADD
                     historyTurn = makeTurnHistoryMap(turn, turnHistoryMapListOpponent, turnHistoryMapListMainPlayer, opponentShipsForEachTurn.size() - opponentShipSunk.size(), mainPlayerShipsForEachTurn.size() - mainPlayerShipSunk.size());
                     turnHistory.add(historyTurn);
-
-
                 }
 
                 gamePlayer.put("turnHistory", turnHistory);
@@ -146,10 +119,7 @@ public class SalvoController {
                 gamePlayer.put("opponent", playerList(opponents));
                 gamePlayer.put("mainPlayerShips", shipsList(gamePlayerById.getShips()));
                 gamePlayer.put("mainPlayerSalvos", salvoList(gamePlayerById.getSalvos()));
-                gamePlayer.put("opponentShipGetHit", opponentShipGetHit);
                 gamePlayer.put("opponentSalvos", salvoList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getSalvos()));
-
-
             }
         }
 
@@ -188,27 +158,13 @@ public class SalvoController {
             return new ResponseEntity<>(makeResponseEntityMap("message", "Please log in to add new game"), HttpStatus.UNAUTHORIZED);
         }
 
-        //1st WAY
         Game newGame = new Game();
-
         GamePlayer gamePlayerThisGame = new GamePlayer();
         gamePlayerThisGame.setPlayer(getCurrentUser(authentication));
         gamePlayerRepo.save(gamePlayerThisGame);
-
         newGame.addGamePlayer(gamePlayerThisGame);
         gameRepo.save(newGame);
 
-//        Game newGame = new Game();
-//        gameRepo.save(newGame);
-//
-//        GamePlayer gamePlayerThisGame = new GamePlayer(newGame, getCurrentUser(authentication));
-//        gamePlayerRepo.save(gamePlayerThisGame);
-//
-//        gameRepo.save(newGame);
-
-//        return ResponseEntity.ok()
-//                .header("Custom-Header", "foo")
-//                .body("Custom header set");
         return new ResponseEntity<>(makeResponseEntityMap("gamePlayerId", gamePlayerThisGame.getId()), HttpStatus.CREATED);
     }
 
@@ -356,7 +312,6 @@ public class SalvoController {
     private Map<String, Object> makeSalvoMap(Salvo salvo) {
         Map<String, Object> salvoMap = new LinkedHashMap<>();
         salvoMap.put("turn", salvo.getTurn());
-//        salvoMap.put("player", salvo.getGamePlayer().getPlayer().getId());
         salvoMap.put("location", salvo.getTurnLocation());
         return salvoMap;
     }
@@ -498,5 +453,4 @@ public class SalvoController {
             }
         }
     }
-
 }
