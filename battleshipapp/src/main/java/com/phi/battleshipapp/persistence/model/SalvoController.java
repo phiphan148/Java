@@ -33,6 +33,9 @@ public class SalvoController {
     @Autowired
     private SalvoRepository salvoRepo;
 
+    @Autowired
+    private ScoreRepository scoreRepo;
+
     @RequestMapping(value = "/games", method = RequestMethod.GET)
     public Map<String, Object> makeGameMapWithCurrentUser(Authentication authentication) {
         Map<String, Object> gameMapWithCurrentUser = new LinkedHashMap<>();
@@ -76,12 +79,12 @@ public class SalvoController {
                 //DECLARE FOR TURN HISTORY
                 List<Ship> opponentShipsForEachTurn = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getShips().stream().collect(toList());
                 List<Ship> mainPlayerShipsForEachTurn = gamePlayerById.getShips().stream().collect(toList());
-                List<Salvo> mainPlayerSalvos = gamePlayerById.salvos.stream().collect(toList());
-                //SORT SALVO BY TURN
-                Collections.sort(mainPlayerSalvos, Salvo.salvoByTurn);
-                List<Salvo> opponentSalvos = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).salvos.stream().collect(toList());
-                //SORT SALVO BY TURN
-                Collections.sort(opponentSalvos, Salvo.salvoByTurn);
+                List<Salvo> mainPlayerSalvos = gamePlayerById.salvos.stream().sorted(Comparator.comparingInt(Salvo::getTurn)).collect(toList());
+//                SORT SALVO BY TURN
+//                Collections.sort(mainPlayerSalvos, Salvo.salvoByTurn);
+                List<Salvo> opponentSalvos = getGamePlayerOpponent(gamePlayerSet, gamePlayerById).salvos.stream().sorted((b1, b2) -> b1.getTurn() - b2.getTurn()).collect(toList());
+//                SORT SALVO BY TURN
+//                Collections.sort(opponentSalvos, Salvo.salvoByTurn);
                 List<Ship> opponentShipSunk = new ArrayList<>();
                 List<Ship> mainPlayerShipSunk = new ArrayList<>();
                 List<Map<String, Object>> turnHistory = new ArrayList<>();
@@ -114,12 +117,35 @@ public class SalvoController {
                 }
 
                 gamePlayer.put("turnHistory", turnHistory);
+
+                if (turnHistory.size() == 0 && mainPlayerShipsForEachTurn.size()<5) {
+                    gamePlayer.put("mainPlayerShipLeftFINAL", null);
+                    gamePlayer.put("opponentShipLeftFINAL", null);
+                } else if(turnHistory.size()>0) {
+                    gamePlayer.put("mainPlayerShipLeftFINAL", turnHistory.get(turnHistory.size()-1).get("mainPlayerShipsLeft"));
+                    gamePlayer.put("opponentShipLeftFINAL", turnHistory.get(turnHistory.size()-1).get("opponentShipsLeft"));
+                }
+
+                if (mainPlayerSalvos.size() > opponentSalvos.size()) {
+                    gamePlayer.put("waitForNextTurn", true);
+                } else {
+                    gamePlayer.put("waitForNextTurn", false);
+                }
+
+                if((turnHistory.size() >0 && (Integer)turnHistory.get(turnHistory.size() - 1).get("mainPlayerShipsLeft") == 0 && mainPlayerSalvos.size() == opponentSalvos.size())
+                        || (turnHistory.size() >0 && (Integer)turnHistory.get(turnHistory.size() - 1).get("opponentShipsLeft") == 0 && mainPlayerSalvos.size() == opponentSalvos.size())){
+                    gamePlayer.put("gameOver", true);
+                } else {
+                    gamePlayer.put("gameOver", false);
+                }
+
                 gamePlayer.put("game", makeGameMap(gamePlayerById.getGame()));
                 gamePlayer.put("mainPlayer", makePlayerMap(gamePlayerById.getPlayer()));
                 gamePlayer.put("opponent", playerList(opponents));
                 gamePlayer.put("mainPlayerShips", shipsList(gamePlayerById.getShips()));
                 gamePlayer.put("mainPlayerSalvos", salvoList(gamePlayerById.getSalvos()));
                 gamePlayer.put("opponentSalvos", salvoList(getGamePlayerOpponent(gamePlayerSet, gamePlayerById).getSalvos()));
+
             }
         }
 
@@ -258,12 +284,22 @@ public class SalvoController {
             return new ResponseEntity<>(makeResponseEntityMap("message", "You are not authorise to create new ships"), HttpStatus.UNAUTHORIZED);
         }
 
-        salvo.setGamePlayer(gamePlayerById);
-        salvo.setTurn(3);
+        List<Salvo> mainPlayerSalvos = gamePlayerById.salvos.stream().sorted((b1,b2)->b1.getTurn() - b2.getTurn()).collect(toList());
+        List<Salvo> opponentSalvos = getGamePlayerOpponent(gamePlayerById.getGame().gamePlayers, gamePlayerById).salvos.stream().collect(toList());
 
         List<List<String>> salvoLocation = gamePlayerById.salvos.stream().map(salvoL -> salvoL.getTurnLocation()).collect(toList());
         List<String> mainPlayerSalvoLocation = salvoLocation.stream()
                 .flatMap(location -> location.stream()).collect(toList());
+
+
+        salvo.setGamePlayer(gamePlayerById);
+        if(mainPlayerSalvos.size() == 0){
+            salvo.setTurn(1);
+        } else {
+            int turn = mainPlayerSalvos.get(mainPlayerSalvos.size()-1).getTurn();
+            int turn2 = turn + 1;
+            salvo.setTurn(turn2);
+        }
 
         List<String> overlapSalvo = new ArrayList<>();
         for (int i = 0; i < salvo.getTurnLocation().size(); i++) {
@@ -274,7 +310,11 @@ public class SalvoController {
 
         List<Integer> salvoTurn = gamePlayerById.salvos.stream().map(salvoL -> salvoL.getTurn()).collect(toList());
         if (salvoTurn.contains(salvo.getTurn())) {
-            return new ResponseEntity<>(makeResponseEntityMap("Cannot use this turn", salvo.getTurn()), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(makeResponseEntityMap("Cannot fire the turn you already had", salvo.getTurn()), HttpStatus.FORBIDDEN);
+        }
+
+        if(mainPlayerSalvos.size()>opponentSalvos.size()){
+            return new ResponseEntity<>(makeResponseEntityMap("Error message:", "Wait for next turn"), HttpStatus.FORBIDDEN);
         }
 
         if (overlapSalvo.size() > 0) {
@@ -283,6 +323,17 @@ public class SalvoController {
             salvoRepo.save(salvo);
         }
 
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/games/players/{gamePlayerId}/scores", method = RequestMethod.POST)
+    public ResponseEntity<Object> updateScore(@PathVariable Long gamePlayerId, @RequestBody Score newScore) {
+        GamePlayer gamePlayerById = gamePlayerRepo.findById(gamePlayerId).get();
+        Player playerByGpId = gamePlayerById.getPlayer();
+        Game gameById = gamePlayerById.getGame();
+        newScore.setPlayer(playerByGpId);
+        newScore.setGame(gameById);
+        scoreRepo.save(newScore);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -419,34 +470,33 @@ public class SalvoController {
 
     private void getShipInfo(List<String> locationGetHitList, Salvo salvo, List<Ship> shipListForEachTurn, List<Ship> shipsSunkList,
                              List<Map<String, Object>> turnHistoryMapList) {
-        for (int k = 0; k < shipListForEachTurn.size(); k++) {
+        for (Ship aShipListForEachTurn : shipListForEachTurn) {
             List<String> locationGetHitEachTurn = new ArrayList<>();
             for (int j = 0; j < salvo.getTurnLocation().size(); j++) {
-                if (shipListForEachTurn.get(k).getLocation().contains(salvo.getTurnLocation().get(j))) {
+                if (aShipListForEachTurn.getLocation().contains(salvo.getTurnLocation().get(j))) {
                     if (!locationGetHitList.contains(salvo.getTurnLocation().get(j))) {
                         locationGetHitList.add(salvo.getTurnLocation().get(j));
                     }
                     locationGetHitEachTurn.add(salvo.getTurnLocation().get(j));
-                    List<String> shipLocationLeft = shipListForEachTurn.get(k).getLocation().stream().filter(lo -> !locationGetHitList.contains(lo)).collect(toList());
-
+                    List<String> shipLocationLeft = aShipListForEachTurn.getLocation().stream().filter(lo -> !locationGetHitList.contains(lo)).collect(toList());
                     boolean checkOpponent;
                     if (shipLocationLeft.size() == 0) {
                         checkOpponent = true;
-                        shipsSunkList.add(shipListForEachTurn.get(k));
+                        shipsSunkList.add(aShipListForEachTurn);
                     } else {
                         checkOpponent = false;
                     }
 
-                    String shipType = shipListForEachTurn.get(k).getShipType();
+                    String shipType = aShipListForEachTurn.getShipType();
                     if (turnHistoryMapList.stream().filter(s -> s.containsValue(shipType)).collect(toList()).size() > 0) {
-                        for (int z = 0; z < turnHistoryMapList.size(); z++) {
-                            if (turnHistoryMapList.get(z).containsValue(shipType)) {
-                                turnHistoryMapList.get(z).replace("hitNumber", locationGetHitEachTurn.size());
-                                turnHistoryMapList.get(z).replace("sunk", checkOpponent);
+                        for (Map<String, Object> aTurnHistoryMapList : turnHistoryMapList) {
+                            if (aTurnHistoryMapList.containsValue(shipType)) {
+                                aTurnHistoryMapList.replace("hitNumber", locationGetHitEachTurn.size());
+                                aTurnHistoryMapList.replace("sunk", checkOpponent);
                             }
                         }
                     } else {
-                        Map<String, Object> opponentShipMap = makeShipsGetHitMap(shipListForEachTurn.get(k).getShipType(), locationGetHitEachTurn.size(), checkOpponent);
+                        Map<String, Object> opponentShipMap = makeShipsGetHitMap(aShipListForEachTurn.getShipType(), locationGetHitEachTurn.size(), checkOpponent);
                         turnHistoryMapList.add(opponentShipMap);
                     }
                 }

@@ -1,4 +1,5 @@
-var mainPlayerShips = [];
+var mainPlayerShipsLeftTurn = [];
+// var mainPlayerShips = [];
 function mainGame() {
     let urlParams = new URLSearchParams(window.location.search);
     let gpId = urlParams.get('gp');
@@ -6,34 +7,79 @@ function mainGame() {
         .then(response => response.json())
         .then((data) => {
             let gamePlayerData = data;
-            mainPlayerShips = gamePlayerData.mainPlayerShips;
-            let mainPlayerSalvos = gamePlayerData.mainPlayerSalvos;
-            let opponentSalvos = gamePlayerData.opponentSalvos;
-            let mainPlayerShipType = mainPlayerShips.map(ship => ship.shipType);
-            console.log(mainPlayerShipType);
-            console.log(mainPlayerShips);
-
-            let radioCheckList = document.getElementsByName("ship");
-            radioCheckList.forEach(check => {
-                if (mainPlayerShipType.includes(check.getAttribute("data-shiptype"))) {
-                    check.setAttribute("disabled", "true");
-                } else if (mainPlayerShipType.length >= 5) {
-                    check.setAttribute("disabled", "true");
-                }
-            });
-
+            if(gamePlayerData.mainPlayerShipLeftFINAL != null){
+                mainPlayerShipsLeftTurn = gamePlayerData.turnHistory[gamePlayerData.turnHistory.length - 1].mainPlayerShipsLeft;
+                console.log(mainPlayerShipsLeftTurn);
+            } else {
+                mainPlayerShipsLeftTurn = gamePlayerData.mainPlayerShips;
+                console.log(mainPlayerShipsLeftTurn);
+            }
             if (gamePlayerData.mainPlayer == null) {
                 window.location.href = "../web/games.html";
             } else {
-                document.getElementById('ships-to-add').innerHTML = `<button class="button-style" onclick="createShip(${gpId})">Add ship</button>`;
-                document.getElementById('salvos-to-add').innerHTML = `<button class="button-style" onclick="addSalvo(${gpId})">Add salvo</button>`;
+                let mainPlayerShips = gamePlayerData.mainPlayerShips;
+                console.log(mainPlayerShips);
+                let mainPlayerSalvos = gamePlayerData.mainPlayerSalvos;
+                let opponentSalvos = gamePlayerData.opponentSalvos;
+                let mainPlayerShipType = mainPlayerShips.map(ship => ship.shipType);
+                console.log(mainPlayerShipType);
+                console.log(mainPlayerShips);
+                let finalScore = null;
 
-                displayTurnHistory(gamePlayerData);
-                gridCreate("ship-grid");
-                gridCreate("salvo-grid");
+                let radioCheckList = document.getElementsByName("ship");
+                radioCheckList.forEach(check => {
+                    if (mainPlayerShipType.includes(check.getAttribute("data-shiptype"))) {
+                        check.setAttribute("disabled", "true");
+                    } else if (mainPlayerShipType.length >= 5) {
+                        check.setAttribute("disabled", "true");
+                    }
+                });
                 displayInfo(gamePlayerData);
-                displayGridShip(mainPlayerShips, opponentSalvos);
-                displaySalvoGrid(mainPlayerSalvos);
+                displayTurnHistory(gamePlayerData);
+                if(gamePlayerData.gameOver == false){
+                    document.getElementById("ships-and-direction").style.display = "block";
+                    document.getElementById("grids").style.display = "block";
+                    if (mainPlayerShips.length < 5) {
+                        document.getElementById("salvo-div").style.display = "none";
+                        gridCreate("ship-grid");
+                        displayGridShip(mainPlayerShips, opponentSalvos);
+                        document.getElementById('ships-to-add').innerHTML = `<button class="button-style" onclick="createShip(${gpId})">Add ship</button>`;
+                    } else {
+                        document.getElementById("salvo-div").style.display = "block";
+                        gridCreate("ship-grid");
+                        displayGridShip(mainPlayerShips, opponentSalvos);
+                        gridCreate("salvo-grid");
+                        // setInterval(function () {window.location.href = `../web/game.html?gp=${gpId}`}, 100000);
+                        if (mainPlayerSalvos.length > opponentSalvos.length) {
+                            document.getElementById('salvos-to-add').innerHTML = '<p class="titleTxt-color">Please wait for your turn</p>';
+                        } else {
+                            document.getElementById('salvos-to-add').innerHTML = `<button class="button-style" onclick="addSalvo(${gpId})">Add salvo</button>`;
+                        }
+                        displaySalvoGrid(mainPlayerSalvos);
+                    }
+                } else {
+                    document.getElementById("ships-and-direction").style.display = "none";
+                    document.getElementById("grids").style.display = "none";
+                }
+            }
+
+            if (gamePlayerData.gameOver == true) {
+                if (gamePlayerData.mainPlayerShipLeftFINAL > gamePlayerData.opponentShipLeftFINAL) {
+                    finalScore = 1;
+                } else if (gamePlayerData.mainPlayerShipLeftFINAL == gamePlayerData.opponentShipLeftFINAL) {
+                    finalScore = 0.5;
+                } else {
+                    finalScore = 0;
+                }
+                let score = {score: finalScore};
+                $.post({
+                    url: `/api/games/players/${gpId}/scores`,
+                    data: JSON.stringify(score),
+                    dataType: "text",
+                    contentType: "application/json"
+                })
+                    .done(jqXHR => console.log(score))
+                    .fail((jqXHR, status) => alert(status + " " + jqXHR.responseText));
             }
 
         })
@@ -195,13 +241,15 @@ function chooseLocation(className) {
         console.log(shipBow);
     }
 
-    if (document.getElementById("salvo-grid").contains(className) && className.style.backgroundColor != "green" && className.style.backgroundColor != "orange" && salvoLocation.length < mainPlayerShips.length) {
+    console.log(salvoLocation.length);
+
+    if (document.getElementById("salvo-grid").contains(className) && className.style.backgroundColor != "green" && className.style.backgroundColor != "orange" && salvoLocation.length < 5) {
         className.style.backgroundColor = "orange";
         salvoLocation.push(className.getAttribute("data-classname"));
         console.log(salvoLocation);
-    } else if(className.style.backgroundColor == "orange"){
+    } else if (className.style.backgroundColor == "orange") {
         className.style.backgroundColor = "white";
-        salvoLocation = salvoLocation.filter(lo=> lo != className.getAttribute("data-classname"));
+        salvoLocation = salvoLocation.filter(lo => lo != className.getAttribute("data-classname"));
         console.log(salvoLocation)
     }
 
@@ -229,7 +277,7 @@ function createShip(gamePlayerId) {
                 alert("Your ship location is out of grid, please place ship again");
             } else {
                 for (let i = 0; i < shipLength; i++) {
-                    location.push(String.fromCharCode(letter + i).toUpperCase().concat(shipBow.slice(1,3)));
+                    location.push(String.fromCharCode(letter + i).toUpperCase().concat(shipBow.slice(1, 3)));
                 }
             }
             console.log(letter);
@@ -276,24 +324,24 @@ function displayTurnHistory(data) {
     let table = document.getElementById("turn-history");
     let tBody = document.createElement("tbody");
     let row = '';
-    for(let i=0; i<turnData.length; i++){
+    for (let i = 0; i < turnData.length; i++) {
         let tem = '';
         let mainPlayerHits = '';
         let opponentHits = '';
         tem += `<td style="vertical-align: middle">${turnData[i].turn}</td>`
-        for(let j=0; j<turnData[i].mainPlayerShipGetHitList.length; j++){
+        for (let j = 0; j < turnData[i].mainPlayerShipGetHitList.length; j++) {
             mainPlayerHits += `<p>${turnData[i].mainPlayerShipGetHitList[j].shipType} (get hit (${turnData[i].mainPlayerShipGetHitList[j].hitNumber}), sunk(${turnData[i].mainPlayerShipGetHitList[j].sunk}))</p>`;
         }
-        if(mainPlayerHits == ''){
+        if (mainPlayerHits == '') {
             tem += `<td class="text-left">There is no new ship get hit</td>`;
         } else {
             tem += `<td class="text-left">${mainPlayerHits}</td>`;
         }
         tem += `<td style="vertical-align: middle">${turnData[i].mainPlayerShipsLeft}</td>`
-        for(let j=0; j<turnData[i].opponentShipGetHitList.length; j++){
+        for (let j = 0; j < turnData[i].opponentShipGetHitList.length; j++) {
             opponentHits += `<p>${turnData[i].opponentShipGetHitList[j].shipType} (get hit (${turnData[i].opponentShipGetHitList[j].hitNumber}), sunk(${turnData[i].opponentShipGetHitList[j].sunk}))</p>`;
         }
-        if(opponentHits == ''){
+        if (opponentHits == '') {
             tem += `<td class="text-left">No opponent new ship get hit</td>`;
         } else {
             tem += `<td class="text-left">${opponentHits}</td>`;

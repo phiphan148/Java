@@ -97,12 +97,12 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
             List<String> turnLocation2 = Arrays.asList("D5", "C2", "H3");
             List<String> turnLocation3 = Arrays.asList("G5", "C2", "G1");
 
-            Salvo salvo1 = new Salvo();
-            salvo1.setTurn(1);
-            salvo1.setTurnLocation(turnLocation1);
-            gamePlayer4.addSalvo(salvo1);
-            salvoRepository.save(salvo1);
-            gamePlayerRepository.save(gamePlayer1);
+//            Salvo salvo1 = new Salvo();
+//            salvo1.setTurn(1);
+//            salvo1.setTurnLocation(turnLocation1);
+//            gamePlayer4.addSalvo(salvo1);
+//            salvoRepository.save(salvo1);
+//            gamePlayerRepository.save(gamePlayer4);
 
             Salvo salvo2 = new Salvo(1, turnLocation3);
             gamePlayer1.addSalvo(salvo2);
@@ -127,7 +127,7 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
             Salvo salvo6 = new Salvo(2, turnLocation1);
             gamePlayer2.addSalvo(salvo6);
             salvoRepository.save(salvo6);
-            gamePlayerRepository.save(gamePlayer4);
+            gamePlayerRepository.save(gamePlayer2);
 
 
             Date finishDate1 = Date.from(new Date().toInstant().plusSeconds(86400));
@@ -137,11 +137,11 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
 //            Score score2 = new Score(0,game2,player3,finishDate1);
 //            scoreRepository.save(score2);
 
-            Score score3 = new Score(0.5, game3, player2, finishDate1);
-            scoreRepository.save(score3);
+//            Score score3 = new Score(0.5, game3, player2, finishDate1);
+//            scoreRepository.save(score3);
 
-            Score score4 = new Score(1, game3, player1, finishDate1);
-            scoreRepository.save(score4);
+//            Score score4 = new Score(1, game3, player1, finishDate1);
+//            scoreRepository.save(score4);
 
         };
     }
