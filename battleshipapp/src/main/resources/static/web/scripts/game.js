@@ -1,5 +1,4 @@
 var mainPlayerShipsLeftTurn = [];
-// var mainPlayerShips = [];
 function mainGame() {
     let urlParams = new URLSearchParams(window.location.search);
     let gpId = urlParams.get('gp');
@@ -30,22 +29,23 @@ function mainGame() {
                 radioCheckList.forEach(check => {
                     if (mainPlayerShipType.includes(check.getAttribute("data-shiptype"))) {
                         check.setAttribute("disabled", "true");
-                    } else if (mainPlayerShipType.length >= 5) {
-                        check.setAttribute("disabled", "true");
                     }
                 });
                 displayInfo(gamePlayerData);
                 displayTurnHistory(gamePlayerData);
                 if(gamePlayerData.gameOver == false){
                     document.getElementById("ships-and-direction").style.display = "block";
-                    document.getElementById("grids").style.display = "block";
+                    document.getElementById("grids").style.display = "flex";
                     if (mainPlayerShips.length < 5) {
+                        document.getElementById("turn-history").style.display = "none";
                         document.getElementById("salvo-div").style.display = "none";
                         gridCreate("ship-grid");
                         displayGridShip(mainPlayerShips, opponentSalvos);
                         document.getElementById('ships-to-add').innerHTML = `<button class="button-style" onclick="createShip(${gpId})">Add ship</button>`;
                     } else {
+                        document.getElementById("turn-history").style.display = "inline-table";
                         document.getElementById("salvo-div").style.display = "block";
+                        document.getElementById("ships-and-direction").style.display = "none";
                         gridCreate("ship-grid");
                         displayGridShip(mainPlayerShips, opponentSalvos);
                         gridCreate("salvo-grid");
@@ -89,7 +89,6 @@ function mainGame() {
 mainGame();
 
 function displayInfo(gamePlayerData) {
-    document.getElementById("main-player").innerText = gamePlayerData.mainPlayer.email;
     document.getElementById("created").innerText = convertDate(gamePlayerData.game.created);
     if (gamePlayerData.opponent.length == 0) {
         document.getElementById("opponent").innerText = "There is no opponent"
@@ -124,16 +123,16 @@ function gridCreate(tableId) {
     for (let j = 1; j < firstrow.length; j++) {
         tbodycontent += `<tr>
                                 <th class=${firstcol[j]}0>${firstcol[j]}</th>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}1" class=${firstcol[j]}1></td>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}2" class=${firstcol[j]}2></td>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}3" class=${firstcol[j]}3></td>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}4" class=${firstcol[j]}4></td>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}5" class=${firstcol[j]}5></td>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}6" class=${firstcol[j]}6></td>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}7" class=${firstcol[j]}7></td>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}8" class=${firstcol[j]}8></td>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}9" class=${firstcol[j]}9></td>
-                                <td tabindex="0" onclick="chooseLocation(this)" data-classname="${firstcol[j]}10" class=${firstcol[j]}10></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}1" class=${firstcol[j]}1></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}2" class=${firstcol[j]}2></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}3" class=${firstcol[j]}3></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}4" class=${firstcol[j]}4></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}5" class=${firstcol[j]}5></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}6" class=${firstcol[j]}6></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}7" class=${firstcol[j]}7></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}8" class=${firstcol[j]}8></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}9" class=${firstcol[j]}9></td>
+                                <td tabindex="0" onclick="chooseLocation(this)" onmouseover="mouseChooseLocation(this)" onmouseout="removeMouseChooseLocation(this)" data-classname="${firstcol[j]}10" class=${firstcol[j]}10></td>
                             </tr>`
     }
     table.appendChild(tbody).innerHTML = tbodycontent;
@@ -185,9 +184,9 @@ function checkLoginForGame() {
             let userData = data.currentPlayer;
             if (userData != null) {
                 document.getElementById("playerLoginName").innerText = userData.email;
-                document.getElementById("welcome").style.display = "block";
+                document.getElementById("header").style.display = "flex";
             } else {
-                document.getElementById("welcome").style.display = "none";
+                document.getElementById("header").style.display = "none";
             }
         })
         .catch(err => alert(err))
@@ -219,7 +218,6 @@ function getShipType() {
 }
 
 var shipDirecttion = "";
-
 function getDirection() {
     let radioCheckList = document.getElementsByName("direction");
     shipDirecttion = "";
@@ -232,16 +230,14 @@ function getDirection() {
 
 var shipBow = "";
 var salvoLocation = [];
-
 function chooseLocation(className) {
     shipBow = "";
+
     if (document.getElementById("ship-grid").contains(className) && className.style.backgroundColor != "blue") {
         shipBow = className.getAttribute("data-classname");
         console.log(className);
         console.log(shipBow);
     }
-
-    console.log(salvoLocation.length);
 
     if (document.getElementById("salvo-grid").contains(className) && className.style.backgroundColor != "green" && className.style.backgroundColor != "orange" && salvoLocation.length < 5) {
         className.style.backgroundColor = "orange";
@@ -252,7 +248,65 @@ function chooseLocation(className) {
         salvoLocation = salvoLocation.filter(lo => lo != className.getAttribute("data-classname"));
         console.log(salvoLocation)
     }
+}
 
+function loopHoverH(className, classCell, cellNum, arrayLength, color, borderColor, borderWidth) {
+    for (let i = cellNum; i < arrayLength; i++) {
+        let subClass = classCell.charAt(0).concat(i);
+        if(document.querySelector(`.${subClass}`).style.backgroundColor != "blue"){
+            className.style.backgroundColor = color;
+            document.querySelector(`.${subClass}`).style.backgroundColor = color;
+        } else {
+            document.querySelector(`.${subClass}`).style.borderColor = borderColor;
+            document.querySelector(`.${subClass}`).style.borderWidth = borderWidth;
+        }
+    }
+
+}
+
+function loopHoverV(className, classCell, cellCharNum, arrayLength, color, borderColor, borderWidth) {
+    for (let i = cellCharNum; i < arrayLength; i++) {
+        let subClass = String.fromCharCode(i).toUpperCase().concat(classCell.slice(1,3));
+        if(document.querySelector(`.${subClass}`).style.backgroundColor != "blue"){
+            className.style.backgroundColor = color;
+            document.querySelector(`.${subClass}`).style.backgroundColor = color;
+        } else {
+            document.querySelector(`.${subClass}`).style.borderColor = borderColor;
+            document.querySelector(`.${subClass}`).style.borderWidth = borderWidth;
+        }
+    }
+}
+
+function countForHover(className, color, warningColor, borderColor, borderWidth) {
+    let classCell = className.getAttribute("data-classname");
+    if (shipDirecttion == 'horizontal') {
+        let cellNum = parseInt(classCell.slice(1,3));
+        if (cellNum + shipLength <= 11) {
+            loopHoverH(className, classCell, cellNum, (cellNum + shipLength), color, borderColor, borderWidth);
+        } else {
+            loopHoverH(className, classCell, cellNum, 11, warningColor, borderColor, borderWidth);
+        }
+    } else if (shipDirecttion == 'vertical'){
+        let cellCharNum = classCell.charCodeAt(0);
+        if (cellCharNum + shipLength <= 75) {
+            loopHoverV(className, classCell, cellCharNum, (cellCharNum + shipLength), color, borderColor, borderWidth);
+        } else {
+            loopHoverV(className, classCell, cellCharNum, 75, warningColor, borderColor, borderWidth);
+        }
+    }
+}
+
+function mouseChooseLocation(className) {
+    if (document.getElementById("ship-grid").contains(className) && className.style.backgroundColor != "blue") {
+        console.log(className);
+        countForHover(className, "orange", "red", "red", "thick");
+    }
+}
+
+function removeMouseChooseLocation(className) {
+    if (document.getElementById("ship-grid").contains(className) && className.style.backgroundColor != "blue") {
+        countForHover(className, "", "", "#dee2e6", "thin");
+    }
 }
 
 function createShip(gamePlayerId) {
@@ -260,8 +314,6 @@ function createShip(gamePlayerId) {
         let location = [];
         if (shipDirecttion == 'horizontal') {
             let num = parseInt(shipBow.slice(1, 3));
-            console.log(num);
-            console.log(shipLength);
             if (num + shipLength > 11) {
                 alert("Your ship location is out of grid, please place ship again");
             } else {
@@ -269,8 +321,6 @@ function createShip(gamePlayerId) {
                     location.push(shipBow.charAt(0).concat(num + i));
                 }
             }
-            console.log(shipLength);
-            console.log(location);
         } else {
             let letter = shipBow.charCodeAt(0);
             if (letter + shipLength > 75) {
@@ -280,8 +330,6 @@ function createShip(gamePlayerId) {
                     location.push(String.fromCharCode(letter + i).toUpperCase().concat(shipBow.slice(1, 3)));
                 }
             }
-            console.log(letter);
-            console.log(shipLength);
         }
         if (location != "") {
             let data = {shipType: `${shipChooseType}`, location: location};
@@ -348,6 +396,22 @@ function displayTurnHistory(data) {
         }
         tem += `<td style="vertical-align: middle">${turnData[i].opponentShipsLeft}</td>`
         row += `<tr>${tem}</tr>`;
+    }
+
+    if(data.gameOver == false){
+        if(data.waitForNextTurn == true){
+            row += `<tr>
+                <td style="background: #ece9e9; border: none" class="text-left" colspan="5">Game status: Waiting for fire</td>
+            </tr>`
+        } else {
+            row += `<tr>
+                <td style="background: #ece9e9; border: none" class="text-left" colspan="5">Game status: Fire</td>
+            </tr>`
+        }
+    } else {
+        row += `<tr>
+                <td style="background: #ece9e9; border: none" class="text-left" colspan="5">Game status: Game Over</td>
+            </tr>`
     }
 
     table.appendChild(tBody).innerHTML = row;

@@ -15,17 +15,27 @@
 </head>
 <body onload="checkLogin()">
 <div class="bg">
-    <div class="container">
-        <div id="welcome">
+    <div id="header" class="row">
+        <div class="col-4 align-self-center">
+            <h3>Dashboard</h3>
+        </div>
+        <div class="col-8 align-self-center text-right">
             <p class="text-warning font-weight-bold">Hi <span id="playerLoginName"></span>!</p>
+            <p id="current-game" data-toggle="collapse" href="#link-to-reenter-game"
+               aria-expanded="false" aria-controls="link-to-reenter-game">
+            </p>
+            <ul class="collapse" id="link-to-reenter-game">
+            </ul>
             <form id="logout-form" onsubmit="return false">
-                <span class="titleTxt-color"><i onclick="logout()" class="fas fa-power-off"
-                                                style="cursor: pointer; margin-right: 3px"></i>Log out here</span>
+                <span><i onclick="logout()" class="fas fa-power-off"
+                         style="cursor: pointer; margin-right: 3px"></i>Log out</span>
             </form>
         </div>
-
-        <div id="form-logIn-register" style="width: 80%; margin: 0px auto" class="form-style titleTxt-color mt-3">
-            <form id="login-form" onsubmit="return false">
+    </div>
+    <div class="container" style="padding-top: 10px">
+        <div id="form-logIn-register" class="form-style mt-3">
+            <h3>LOG IN</h3>
+            <form id="login-form" onsubmit="return false" class="section">
                 <div class="row">
                     <div class="row col-12 text-center">
                         <p class="col-3">Email:</p>
@@ -37,10 +47,11 @@
                                name="passwordLogin">
                     </div>
                     <button style="margin: 0px auto" class="button col-4 col-sm-3 col-md-2"
-                            onclick="login('usernameLogin','passwordLogin')">Log in
+                            onclick="login()">Log in
                     </button>
                 </div>
             </form>
+            <h3 class="section">SIGN UP</h3>
             <form id="register-form" onsubmit="return false" class="section">
                 <div class="row">
                     <div class="row col-12 text-center">
@@ -66,14 +77,8 @@
             </form>
         </div>
         <div id="table-score">
-            <h1 class="pb-3 titleTxt-color pt-3">Player Manager</h1>
-            <div class="pb-3 row">
-                <p id="current-game" class="col-12 col-sm-6 col-md-4"></p>
-                <ul id="link-to-reenter-game" class="col col-sm col-md">
-                </ul>
-            </div>
-            <button onclick="addGame()" class="mb-2">Create a new game</button>
-            <button style="display: none" type='button' onclick="clickJoin()" id="joinGame">Join New Game</button>
+                <button onclick="addGame()" class="mb-2">Create a new game</button>
+                <button style="display: none" type='button' onclick="clickJoin()" id="joinGame">Join New Game</button>
             <div class="table-responsive">
                 <table id="score-table" class="table table-bordered table-style padding-cell mt-2"></table>
             </div>

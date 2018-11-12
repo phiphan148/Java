@@ -2,26 +2,31 @@ body, html {
     height: 100%;
 }
 
-p, h1, h2, h3, h4, h5, h6, ul, li{
+p, h1, h2, h3, h4, h5, h6, ul, li {
     margin: 0px;
     padding: 0px;
 }
+
 @media only screen and (min-width: 576px) and (max-width: 992px) {
     .table-style td, th {
         min-width: 30px !important;
     }
 }
 
-ul li{
+ul li {
     list-style: none;
 }
 
-a:hover{
+a{
+    color: #fff;
+}
+
+a:hover {
     color: #FFC108;
     text-decoration: none;
 }
 
-.titleTxt-color{
+.titleTxt-color {
     color: #fff;
 }
 
@@ -35,23 +40,40 @@ a:hover{
     height: 50px;
 }
 
-.table-style thead, tbody th{
+.table-style thead, tbody th {
     background: rgba(122, 194, 255, 0.33);
 }
 
-.bg{
+.bg {
     background: url("../img/bg.jpg") center no-repeat;
     min-height: 100%;
-    padding-top: 10px;
-    /*height: 100vh;*/
     background-size: cover;
 }
 
-.nonActive{
+.nonActive {
     display: none;
 }
 
-.form-style input{
+#header {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 10px 20px;
+}
+
+#header p{
+    cursor: pointer;
+}
+
+.form-style {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    width: 80%;
+    margin: 0px auto;
+    display: block;
+    color: white;
+}
+
+.form-style input {
     border-radius: 3px;
     border: none;
     outline: none;
@@ -59,16 +81,20 @@ a:hover{
     margin-bottom: 10px;
 }
 
-.button{
+.form-style h3 {
+    color: #f78219;
+}
+
+.button {
     border-radius: 3px;
     outline: none;
 }
 
-.section{
+.section {
     padding-top: 20px;
 }
 
-#table-score button{
+#table-score button {
     border-radius: 3px;
     outline: none;
     background-color: white;
@@ -76,17 +102,17 @@ a:hover{
     cursor: pointer;
 }
 
-#ship-grid td:focus{
+#ship-grid td:focus {
     background-color: yellow;
     outline: none;
 }
 
-#salvo-grid td:focus{
+#salvo-grid td:focus {
     /*background-color: orange;*/
     outline: none;
 }
 
-.button-style{
+.button-style {
     border-radius: 3px;
     outline: none;
     background-color: white;
@@ -94,6 +120,6 @@ a:hover{
     cursor: pointer;
 }
 
-#turn-history th, td{
+#turn-history th, td {
     vertical-align: middle;
 }

@@ -52,6 +52,13 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
             Player player3 = new Player("Beatle", "Phan", "beatle@gmail.com", passwordEncoder.encode("24681012"));
             playerRepository.save(player3);
 
+//            Player player1 = new Player("Phi", "Phan", "phi@gmail.com", "12345678");
+//            playerRepository.save(player1);
+//            Player player2 = new Player("Alain", "Phan", "alain@gmail.com", "135791113");
+//            playerRepository.save(player2);
+//            Player player3 = new Player("Beatle", "Phan", "beatle@gmail.com", "24681012");
+//            playerRepository.save(player3);
+
             Game game1 = new Game();
             gameRepository.save(game1);
             Game game2 = new Game();
@@ -183,8 +190,8 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin();
 
         http.formLogin()
-                .usernameParameter("name")
-                .passwordParameter("pwd")
+                .usernameParameter("username")
+                .passwordParameter("password")
                 .loginPage("/api/login");
 
         http.logout().logoutUrl("/api/logout");
