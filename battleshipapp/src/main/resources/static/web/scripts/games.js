@@ -97,37 +97,35 @@ function checkLogin() {
         .catch(err => alert(err))
 }
 
-// function login() {
-//     let data = {
-//         username: document.getElementById("usernameLogin").value,
-//         password: document.getElementById("passwordLogin").value
-//     };
-//
-//     fetch("/api/login", {
-//         method: "POST",
-//         body: JSON.stringify(data),
-//         headers: new Headers({
-//             contentType: 'application/json'
-//         }),
-//         credentials: "same-origin" })
-//         .then(response => response.json())
-//         .then((data) => {
-//             console.log(data);
-//         })
-//         .catch(error => console.log(error));
-// }
-
-
 function login() {
-    let username = document.getElementById("usernameLogin");
-    let password = document.getElementById("passwordLogin");
-    $.post("/api/login", {username: username.value, password: password.value})
-        .done(function () {
+    let data = {
+        username: document.getElementById("usernameLogin").value,
+        password: document.getElementById("passwordLogin").value
+    };
+
+    fetch("/api/login", {
+        method: "POST",
+        body: `username=${ data.username }&password=${ data.password }`,
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: "include" })
+        .then(function () {
             window.location.reload();
-            console.log("logged in!");
         })
-        .fail(err => alert(`${err.responseJSON.status}: ${err.responseJSON.error}`));
+        .catch(error => console.log(error));
 }
+// function login() {
+//     let username = document.getElementById("usernameLogin");
+//     let password = document.getElementById("passwordLogin");
+//     $.post("/api/login", {username: username.value, password: password.value})
+//         .done(function () {
+//             window.location.reload();
+//             console.log("logged in!");
+//         })
+//         .fail(err => alert(`${err.responseJSON.status}: ${err.responseJSON.error}`));
+// }
 
 function logout() {
     fetch('/api/logout', {
@@ -140,21 +138,26 @@ function logout() {
 }
 
 function register() {
-    let firstName = document.getElementById("firstNameRegister");
-    let lastName = document.getElementById("lastNameRegister");
-    let username = document.getElementById("usernameRegister");
-    let password = document.getElementById("passwordRegister");
-    $.post("/api/players",
-        {
-            firstname: firstName.value,
-            lastname: lastName.value,
-            username: username.value,
-            password: password.value
+    let data = {
+        firstName: document.getElementById("firstNameRegister").value,
+        lastName: document.getElementById("lastNameRegister").value,
+        username: document.getElementById("usernameRegister").value,
+        password: document.getElementById("passwordRegister").value
+    };
+
+    fetch("/api/players", {
+        method: "POST",
+        body: `firstname=${ data.firstName }&lastname=${ data.lastName }&username=${ data.username }&password=${ data.password }`,
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: "include" })
+        .then(function () {
+            alert("Register successfully");
+            window.location.reload();
         })
-        .done(function () {
-            login('usernameRegister', 'passwordRegister');
-        })
-        .fail(err => console.log(err));
+        .catch(error => console.log(error));
 }
 
 function addGame() {

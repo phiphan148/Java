@@ -152,8 +152,8 @@ public class SalvoController {
         return gamePlayer;
     }
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
 
     @RequestMapping(value = "/players", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> register(
@@ -168,14 +168,15 @@ public class SalvoController {
             return new ResponseEntity<>(makeResponseEntityMap("error", "Email already in use"), HttpStatus.FORBIDDEN);
         }
 
-        playerRepo.save(new Player(firstname, lastname, username, passwordEncoder.encode(password)));
+//        playerRepo.save(new Player(firstname, lastname, username, passwordEncoder.encode(password)));
+        playerRepo.save(new Player(firstname, lastname, username, password));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/players", method = RequestMethod.GET)
     public List<String> playerUserNameList() {
         return playerRepo.findAll()
-                .stream().map(Player::getUsername).collect(toList());
+                .stream().map(Player::getPassword).collect(toList());
     }
 
     @RequestMapping(value = "/games", method = RequestMethod.POST)
