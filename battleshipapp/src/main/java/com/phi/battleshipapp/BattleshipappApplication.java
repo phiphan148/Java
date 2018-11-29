@@ -39,25 +39,25 @@ public class BattleshipappApplication extends SpringBootServletInitializer {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Bean
     public CommandLineRunner initGamePlayer(PlayerRepository playerRepository, GameRepository gameRepository, GamePlayerRepository gamePlayerRepository, ShipRepository shipRepository, SalvoRepository salvoRepository, ScoreRepository scoreRepository) {
         return (args) -> {
-//            Player player1 = new Player("Phi", "Phan", "phi@gmail.com", passwordEncoder.encode("12345678"));
-//            playerRepository.save(player1);
-//            Player player2 = new Player("Alain", "Phan", "alain@gmail.com", passwordEncoder.encode("135791113"));
-//            playerRepository.save(player2);
-//            Player player3 = new Player("Beatle", "Phan", "beatle@gmail.com", passwordEncoder.encode("24681012"));
-//            playerRepository.save(player3);
-
-            Player player1 = new Player("Phi", "Phan", "phi@gmail.com", "12345678");
+            Player player1 = new Player("Phi", "Phan", "phi@gmail.com", passwordEncoder.encode("12345678"));
             playerRepository.save(player1);
-            Player player2 = new Player("Alain", "Phan", "alain@gmail.com", "135791113");
+            Player player2 = new Player("Alain", "Phan", "alain@gmail.com", passwordEncoder.encode("135791113"));
             playerRepository.save(player2);
-            Player player3 = new Player("Beatle", "Phan", "beatle@gmail.com", "24681012");
+            Player player3 = new Player("Beatle", "Phan", "beatle@gmail.com", passwordEncoder.encode("24681012"));
             playerRepository.save(player3);
+
+//            Player player1 = new Player("Phi", "Phan", "phi@gmail.com", "12345678");
+//            playerRepository.save(player1);
+//            Player player2 = new Player("Alain", "Phan", "alain@gmail.com", "135791113");
+//            playerRepository.save(player2);
+//            Player player3 = new Player("Beatle", "Phan", "beatle@gmail.com", "24681012");
+//            playerRepository.save(player3);
 
             Game game1 = new Game();
             gameRepository.save(game1);
@@ -168,13 +168,13 @@ class WebSecurityConfiguration extends GlobalAuthenticationConfigurerAdapter {
             Player player = playerRepo.findByUsername(inputName);
             System.out.println(player);
             if (player != null) {
-//                return new User(player.getUsername(), player.getPassword(),
-//                        AuthorityUtils.createAuthorityList("USER"));
-                return User.withDefaultPasswordEncoder()
-                        .username(player.getUsername())
-                        .password(player.getPassword())
-                        .roles("USER")
-                        .build();
+                return new User(player.getUsername(), player.getPassword(),
+                        AuthorityUtils.createAuthorityList("USER"));
+//                return User.withDefaultPasswordEncoder()
+//                        .username(player.getUsername())
+//                        .password(player.getPassword())
+//                        .roles("USER")
+//                        .build();
             } else {
                 System.out.println("Unknown user: " + inputName);
                 throw new UsernameNotFoundException("Unknown user: " + inputName);
